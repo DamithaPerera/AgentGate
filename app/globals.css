@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background-color: #080f1a;
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* Security dashboard aesthetic */
+.panel {
+  background-color: #0d1829;
+  border: 1px solid #1e3a5f;
+  border-radius: 0.5rem;
+}
+
+/* Feed entry animations */
+.feed-entry {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-12px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* CIBA card pulse */
+.ciba-card {
+  animation: cibaPulse 2s ease-in-out infinite;
+}
+
+@keyframes cibaPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #080f1a; }
+::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2d5a8e; }
