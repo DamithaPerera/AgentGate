@@ -2,10 +2,7 @@
 import { useState } from 'react';
 import type { PolicyRule } from '@/lib/types';
 
-interface Props {
-  rules: PolicyRule[];
-  onRulesChange: (rules: PolicyRule[]) => void;
-}
+interface Props { rules: PolicyRule[]; onRulesChange: (rules: PolicyRule[]) => void; }
 
 export function PolicyEditor({ rules, onRulesChange }: Props) {
   const [text, setText] = useState('');
@@ -47,51 +44,59 @@ export function PolicyEditor({ rules, onRulesChange }: Props) {
     onRulesChange(updated);
   };
 
-  const decisionColor: Record<string, string> = {
-    ALLOW: 'text-emerald-400',
-    ESCALATE: 'text-amber-400',
-    DENY: 'text-red-400',
+  const decisionStyle: Record<string, string> = {
+    ALLOW: 'var(--color-success-text)',
+    ESCALATE: 'var(--color-warning-text)',
+    DENY: 'var(--color-danger-text)',
   };
 
   return (
-    <div className="space-y-4">
-      {/* Natural language input */}
+    <div className="space-y-3">
+      {/* Input row */}
       <div className="flex gap-2">
-        <input
-          type="text"
+        <input type="text"
           placeholder='e.g. "Agents can read Gmail but cannot send to external addresses"'
           value={text}
           onChange={e => setText(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleCompile()}
-          className="flex-1 bg-[#0a1520] border border-[#1e3a5f] rounded-lg px-3 py-2 text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:border-teal-700"
-        />
-        <button
-          onClick={handleCompile}
-          disabled={compiling || !text.trim()}
-          className="bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-lg transition-colors font-medium"
-        >
-          {compiling ? '...' : 'Apply'}
+          className="flex-1 rounded px-3 py-1.5 text-sm border focus:outline-none"
+          style={{ background: 'var(--color-bg-surface)', borderColor: 'var(--color-border)',
+            color: 'var(--color-text-high)' }} />
+        <button onClick={handleCompile} disabled={compiling || !text.trim()}
+          className="text-white text-sm font-semibold px-4 py-1.5 rounded disabled:opacity-50 transition-opacity hover:opacity-90"
+          style={{ background: 'var(--color-brand)' }}>
+          {compiling ? '…' : 'Apply'}
         </button>
       </div>
 
       {message && (
-        <div className={`text-sm px-3 py-2 rounded-lg ${message.type === 'success' ? 'bg-emerald-900/30 text-emerald-400' : 'bg-red-900/30 text-red-400'}`}>
+        <div className="text-xs px-3 py-1.5 rounded border font-medium"
+          style={{
+            background: message.type === 'success' ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
+            color: message.type === 'success' ? 'var(--color-success-text)' : 'var(--color-danger-text)',
+            borderColor: message.type === 'success' ? '#ABF5D1' : '#FFBDAD',
+          }}>
           {message.text}
         </div>
       )}
 
-      {/* Active rules */}
-      <div className="space-y-1.5 max-h-48 overflow-y-auto">
+      {/* Rules list */}
+      <div className="space-y-1 max-h-40 overflow-y-auto">
         {rules.map(rule => (
-          <div key={rule.id} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${rule.enabled ? 'bg-[#0d1829]' : 'bg-[#0a1520] opacity-50'}`}>
-            <button
-              onClick={() => toggleRule(rule.id)}
-              className={`w-8 h-4 rounded-full transition-colors relative flex-shrink-0 ${rule.enabled ? 'bg-teal-700' : 'bg-slate-700'}`}
-            >
-              <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${rule.enabled ? 'translate-x-4' : 'translate-x-0.5'}`} />
+          <div key={rule.id} className="flex items-center gap-2 px-3 py-1.5 rounded border text-xs"
+            style={{
+              background: rule.enabled ? 'var(--color-bg-surface)' : 'var(--color-bg-sunken)',
+              borderColor: 'var(--color-border)',
+              opacity: rule.enabled ? 1 : 0.55,
+            }}>
+            {/* Toggle */}
+            <button onClick={() => toggleRule(rule.id)}
+              className="w-8 h-4 rounded-full relative flex-shrink-0 transition-colors"
+              style={{ background: rule.enabled ? 'var(--color-brand)' : 'var(--color-border-bold)' }}>
+              <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform shadow-sm ${rule.enabled ? 'translate-x-4' : 'translate-x-0.5'}`} />
             </button>
-            <span className="flex-1 text-slate-300 truncate">{rule.name}</span>
-            <span className={`text-xs font-medium flex-shrink-0 ${decisionColor[rule.decision] ?? 'text-slate-400'}`}>
+            <span className="flex-1 truncate" style={{ color: 'var(--color-text-medium)' }}>{rule.name}</span>
+            <span className="font-semibold flex-shrink-0" style={{ color: decisionStyle[rule.decision] ?? 'var(--color-text-low)' }}>
               {rule.decision}
             </span>
           </div>

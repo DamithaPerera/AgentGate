@@ -19,7 +19,6 @@ export default function DashboardPage() {
   const registry = useAgentRegistry();
   const audit = useAuditTrail();
 
-  // Load initial rules
   useEffect(() => {
     fetch('/api/policy/rules')
       .then(r => r.json())
@@ -50,62 +49,62 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080f1a] text-slate-100 flex flex-col">
-      {/* Header */}
-      <header className="border-b border-[#1e3a5f] px-4 py-3 flex items-center justify-between flex-shrink-0">
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg-page)', color: 'var(--color-text-high)' }}>
+
+      {/* Top navigation bar — Atlassian style */}
+      <header className="flex items-center justify-between px-4 h-12 flex-shrink-0 z-50"
+        style={{ background: 'var(--color-brand)', color: '#fff' }}>
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-teal-700 rounded-lg flex items-center justify-center text-white font-bold text-xs">AG</div>
-            <span className="font-semibold tracking-tight">AgentGate</span>
+            <div className="w-6 h-6 bg-white rounded flex items-center justify-center font-bold text-xs"
+              style={{ color: 'var(--color-brand)' }}>AG</div>
+            <span className="font-semibold text-sm text-white">AgentGate</span>
           </Link>
-          <span className="text-slate-600">·</span>
-          <span className="text-sm text-slate-500">Security Dashboard</span>
+          <span className="opacity-40 text-white">|</span>
+          <span className="text-xs text-white opacity-75">Security Dashboard</span>
         </div>
 
         <div className="flex items-center gap-2">
           {demoMessage && (
-            <span className="text-sm text-teal-400 mr-2">{demoMessage}</span>
+            <span className="text-xs text-white opacity-90 mr-2">{demoMessage}</span>
           )}
           <button
             onClick={runDemo}
             disabled={demoRunning}
-            className="bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white text-sm px-4 py-1.5 rounded-lg font-medium transition-colors"
-          >
-            {demoRunning ? 'Running...' : 'Run Demo'}
+            className="text-xs font-semibold px-3 py-1.5 rounded disabled:opacity-50 transition-opacity hover:opacity-90"
+            style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>
+            {demoRunning ? 'Running...' : '▶ Run Demo'}
           </button>
-          <Link
-            href="/api/auth/login"
-            className="text-sm text-slate-400 hover:text-slate-200 border border-[#1e3a5f] hover:border-teal-700 px-3 py-1.5 rounded-lg transition-colors"
-          >
-            Login
+          <Link href="/api/auth/login"
+            className="text-xs font-medium px-3 py-1.5 rounded transition-opacity hover:opacity-90"
+            style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)' }}>
+            Log in
           </Link>
         </div>
       </header>
 
       {/* Policy Editor Bar */}
-      <div className="border-b border-[#1e3a5f] px-4 py-3 flex-shrink-0">
-        <div className="max-w-full">
-          <div className="text-xs text-slate-500 uppercase tracking-wider mb-2">Policy Engine</div>
-          <PolicyEditor rules={rules} onRulesChange={setRules} />
-        </div>
+      <div className="px-4 py-3 flex-shrink-0" style={{ background: 'var(--color-bg-surface)', borderBottom: '1px solid var(--color-border)' }}>
+        <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--color-text-low)' }}>Policy Engine</div>
+        <PolicyEditor rules={rules} onRulesChange={setRules} />
       </div>
 
       {/* 3-Panel Grid */}
-      <div className="flex-1 grid grid-cols-3 gap-0 min-h-0 overflow-hidden">
+      <div className="flex-1 grid grid-cols-3 min-h-0 overflow-hidden">
+
         {/* Panel 1: Agent Registry */}
-        <div className="border-r border-[#1e3a5f] flex flex-col overflow-hidden">
-          <div className="px-4 py-3 border-b border-[#1e3a5f] flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-semibold">Agent Registry</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {registry.agents.filter(a => a.status === 'active').length} active agents
-                </p>
-              </div>
-              <span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" />
+        <div className="flex flex-col overflow-hidden" style={{ borderRight: '1px solid var(--color-border)' }}>
+          <div className="px-4 py-2.5 flex items-center justify-between flex-shrink-0"
+            style={{ background: 'var(--color-bg-sunken)', borderBottom: '1px solid var(--color-border)' }}>
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-medium)' }}>Agent Registry</h2>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-low)' }}>
+                {registry.agents.filter(a => a.status === 'active').length} active
+              </p>
             </div>
+            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-success)' }} />
           </div>
-          <div className="flex-1 p-4 overflow-hidden">
+          <div className="flex-1 p-3 overflow-hidden" style={{ background: 'var(--color-bg-surface)' }}>
             <AgentRegistry
               agents={registry.agents}
               onRevoke={registry.revokeAgent}
@@ -116,38 +115,36 @@ export default function DashboardPage() {
         </div>
 
         {/* Panel 2: Live Feed */}
-        <div className="border-r border-[#1e3a5f] flex flex-col overflow-hidden">
-          <div className="px-4 py-3 border-b border-[#1e3a5f] flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-semibold">Live Feed</h2>
-                <p className="text-xs text-slate-500 mt-0.5">Real-time authorization events</p>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                <span className="text-xs text-slate-500">SSE</span>
-              </div>
+        <div className="flex flex-col overflow-hidden" style={{ borderRight: '1px solid var(--color-border)' }}>
+          <div className="px-4 py-2.5 flex items-center justify-between flex-shrink-0"
+            style={{ background: 'var(--color-bg-sunken)', borderBottom: '1px solid var(--color-border)' }}>
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-medium)' }}>Live Feed</h2>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-low)' }}>Real-time events</p>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-success)' }} />
+              <span className="text-xs" style={{ color: 'var(--color-text-subtle)' }}>SSE</span>
             </div>
           </div>
-          <div className="flex-1 p-4 overflow-hidden">
+          <div className="flex-1 p-3 overflow-hidden" style={{ background: 'var(--color-bg-surface)' }}>
             <LiveFeed events={events} />
           </div>
         </div>
 
         {/* Panel 3: Audit Trail */}
         <div className="flex flex-col overflow-hidden">
-          <div className="px-4 py-3 border-b border-[#1e3a5f] flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-semibold">Audit Trail</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {audit.entries.length} entries · SHA-256 hash chain
-                </p>
-              </div>
-              <span className="text-xs text-teal-500">tamper-evident</span>
+          <div className="px-4 py-2.5 flex items-center justify-between flex-shrink-0"
+            style={{ background: 'var(--color-bg-sunken)', borderBottom: '1px solid var(--color-border)' }}>
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-medium)' }}>Audit Trail</h2>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-low)' }}>
+                {audit.entries.length} entries · SHA-256 chain
+              </p>
             </div>
+            <span className="text-xs font-medium" style={{ color: 'var(--color-brand)' }}>tamper-evident</span>
           </div>
-          <div className="flex-1 p-4 overflow-hidden">
+          <div className="flex-1 p-3 overflow-hidden" style={{ background: 'var(--color-bg-surface)' }}>
             <AuditTrail
               entries={audit.entries}
               onExport={audit.exportAudit}
@@ -157,10 +154,11 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Status Bar */}
-      <div className="border-t border-[#1e3a5f] px-4 py-2 flex items-center gap-4 text-xs text-slate-600 flex-shrink-0">
+      {/* Status bar */}
+      <div className="px-4 py-1.5 flex items-center gap-4 text-xs flex-shrink-0"
+        style={{ background: 'var(--color-bg-sunken)', borderTop: '1px solid var(--color-border)', color: 'var(--color-text-subtle)' }}>
         <span>AgentGate v0.1 · Auth0 Token Vault · OPA Policy Engine · CIBA Consent</span>
-        <span className="ml-auto">Built for &quot;Authorized to Act: Auth0 for AI Agents&quot; Hackathon</span>
+        <span className="ml-auto">Authorized to Act: Auth0 for AI Agents Hackathon</span>
       </div>
     </div>
   );

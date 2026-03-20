@@ -10,17 +10,22 @@ interface Props {
 }
 
 const FRAMEWORK_LABEL: Record<string, string> = {
-  crewai: 'CrewAI',
-  langgraph: 'LangGraph',
-  autogen: 'AutoGen',
-  custom: 'Custom',
-  mcp: 'MCP',
+  crewai: 'CrewAI', langgraph: 'LangGraph', autogen: 'AutoGen', custom: 'Custom', mcp: 'MCP',
 };
 
 function TrustBadge({ level }: { level: number }) {
-  const colors = ['', 'bg-red-900/60 text-red-300', 'bg-orange-900/60 text-orange-300', 'bg-yellow-900/60 text-yellow-300', 'bg-teal-900/60 text-teal-300', 'bg-emerald-900/60 text-emerald-300'];
+  const styles: { bg: string; color: string }[] = [
+    { bg: '#FFEBE6', color: '#BF2600' },
+    { bg: '#FFEBE6', color: '#BF2600' },
+    { bg: '#FFF0B3', color: '#FF8B00' },
+    { bg: '#FFF0B3', color: '#FF8B00' },
+    { bg: 'var(--color-brand-light)', color: 'var(--color-info-text)' },
+    { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
+  ];
+  const s = styles[level] ?? styles[0];
   return (
-    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors[level] ?? colors[1]}`}>
+    <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+      style={{ background: s.bg, color: s.color }}>
       Trust {level}
     </span>
   );
@@ -30,84 +35,81 @@ export function AgentRegistry({ agents, onRevoke, onRevokeService, onPanic }: Pr
   const [panicConfirm, setPanicConfirm] = useState(false);
   const activeAgents = agents.filter(a => a.status === 'active');
   const services = ['github', 'gmail', 'calendar'];
-
-  const hasService = (service: string) =>
-    activeAgents.some(a => a.capabilities.some(c => c.startsWith(service + '.')));
+  const hasService = (s: string) => activeAgents.some(a => a.capabilities.some(c => c.startsWith(s + '.')));
 
   return (
-    <div className="flex flex-col h-full gap-4">
-      {/* Agents */}
+    <div className="flex flex-col h-full gap-3">
+      {/* Agent list */}
       <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
         {agents.length === 0 ? (
-          <div className="text-slate-500 text-sm text-center py-8">
-            No agents registered yet.
-            <br />Click &quot;Run Demo&quot; to get started.
+          <div className="text-xs text-center py-8" style={{ color: 'var(--color-text-subtle)' }}>
+            No agents registered yet.<br />Click ▶ Run Demo to get started.
           </div>
-        ) : (
-          agents.map(agent => (
-            <div
-              key={agent.id}
-              className={`rounded-lg p-3 border transition-colors ${
-                agent.status === 'active'
-                  ? 'bg-[#0d1f2d] border-[#1e3a5f]'
-                  : 'bg-[#1a0f0f] border-red-900/40 opacity-60'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${agent.status === 'active' ? 'bg-emerald-400' : 'bg-red-500'}`} />
-                    <span className="text-sm font-medium truncate">{agent.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    <span className="text-xs text-slate-500 bg-[#0a1520] px-2 py-0.5 rounded">
-                      {FRAMEWORK_LABEL[agent.framework] ?? agent.framework}
-                    </span>
-                    <TrustBadge level={agent.trustLevel} />
-                    {agent.status !== 'active' && (
-                      <span className="text-xs text-red-400 uppercase">{agent.status}</span>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {agent.capabilities.slice(0, 4).map(cap => (
-                      <span key={cap} className="text-xs bg-[#0a1a2e] text-slate-400 px-1.5 py-0.5 rounded">
-                        {cap}
-                      </span>
-                    ))}
-                    {agent.capabilities.length > 4 && (
-                      <span className="text-xs text-slate-500">+{agent.capabilities.length - 4}</span>
-                    )}
-                  </div>
+        ) : agents.map(agent => (
+          <div key={agent.id} className="rounded p-3 border transition-all"
+            style={{
+              background: agent.status === 'active' ? 'var(--color-bg-page)' : 'var(--color-danger-bg)',
+              borderColor: agent.status === 'active' ? 'var(--color-border)' : '#FFBDAD',
+              opacity: agent.status !== 'active' ? 0.7 : 1,
+            }}>
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ background: agent.status === 'active' ? 'var(--color-success)' : 'var(--color-danger)' }} />
+                  <span className="text-sm font-medium truncate" style={{ color: 'var(--color-text-high)' }}>{agent.name}</span>
                 </div>
-                {agent.status === 'active' && (
-                  <button
-                    onClick={() => onRevoke(agent.id)}
-                    className="text-xs text-red-400 hover:text-red-300 border border-red-900/50 hover:border-red-700/50 px-2 py-1 rounded flex-shrink-0 transition-colors"
-                  >
-                    Revoke
-                  </button>
-                )}
+                <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                  <span className="text-xs px-1.5 py-0.5 rounded border font-medium"
+                    style={{ background: 'var(--color-bg-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-medium)' }}>
+                    {FRAMEWORK_LABEL[agent.framework] ?? agent.framework}
+                  </span>
+                  <TrustBadge level={agent.trustLevel} />
+                  {agent.status !== 'active' && (
+                    <span className="text-xs font-semibold uppercase" style={{ color: 'var(--color-danger-text)' }}>{agent.status}</span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {agent.capabilities.slice(0, 4).map(cap => (
+                    <span key={cap} className="text-xs px-1.5 py-0.5 rounded font-mono"
+                      style={{ background: 'var(--color-brand-light)', color: 'var(--color-info-text)' }}>
+                      {cap}
+                    </span>
+                  ))}
+                  {agent.capabilities.length > 4 && (
+                    <span className="text-xs" style={{ color: 'var(--color-text-subtle)' }}>+{agent.capabilities.length - 4}</span>
+                  )}
+                </div>
               </div>
+              {agent.status === 'active' && (
+                <button onClick={() => onRevoke(agent.id)}
+                  className="text-xs font-medium px-2 py-1 rounded border flex-shrink-0 transition-colors hover:opacity-80"
+                  style={{ color: 'var(--color-danger-text)', borderColor: '#FFBDAD', background: 'var(--color-danger-bg)' }}>
+                  Revoke
+                </button>
+              )}
             </div>
-          ))
-        )}
+          </div>
+        ))}
       </div>
 
-      {/* Services */}
-      <div className="border-t border-[#1e3a5f] pt-4">
-        <div className="text-xs text-slate-500 uppercase tracking-wider mb-2">Connected Services</div>
-        <div className="space-y-2">
+      {/* Connected Services */}
+      <div className="pt-3" style={{ borderTop: '1px solid var(--color-border)' }}>
+        <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--color-text-low)' }}>Connected Services</div>
+        <div className="space-y-1.5">
           {services.map(service => (
             <div key={service} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${hasService(service) ? 'bg-emerald-400' : 'bg-slate-600'}`} />
-                <span className="text-sm capitalize">{service === 'gmail' ? 'Google (Gmail)' : service.charAt(0).toUpperCase() + service.slice(1)}</span>
+                <span className="w-2 h-2 rounded-full"
+                  style={{ background: hasService(service) ? 'var(--color-success)' : 'var(--color-border-bold)' }} />
+                <span className="text-sm" style={{ color: 'var(--color-text-medium)' }}>
+                  {service === 'gmail' ? 'Google (Gmail)' : service.charAt(0).toUpperCase() + service.slice(1)}
+                </span>
               </div>
               {hasService(service) && (
-                <button
-                  onClick={() => onRevokeService(service)}
-                  className="text-xs text-red-400 hover:text-red-300 border border-red-900/40 px-2 py-0.5 rounded transition-colors"
-                >
+                <button onClick={() => onRevokeService(service)}
+                  className="text-xs font-medium px-2 py-0.5 rounded border transition-opacity hover:opacity-80"
+                  style={{ color: 'var(--color-danger-text)', borderColor: '#FFBDAD', background: 'var(--color-danger-bg)' }}>
                   Revoke
                 </button>
               )}
@@ -120,27 +122,24 @@ export function AgentRegistry({ agents, onRevoke, onRevokeService, onPanic }: Pr
       <div>
         {panicConfirm ? (
           <div className="space-y-2">
-            <p className="text-xs text-red-400 text-center">Revoke ALL agents and tokens?</p>
+            <p className="text-xs text-center font-medium" style={{ color: 'var(--color-danger-text)' }}>Revoke ALL agents and tokens?</p>
             <div className="flex gap-2">
-              <button
-                onClick={() => { onPanic(); setPanicConfirm(false); }}
-                className="flex-1 bg-red-700 hover:bg-red-600 text-white text-sm py-2 rounded-lg font-medium transition-colors"
-              >
-                Confirm Panic
+              <button onClick={() => { onPanic(); setPanicConfirm(false); }}
+                className="flex-1 text-white text-xs font-semibold py-2 rounded transition-opacity hover:opacity-90"
+                style={{ background: 'var(--color-danger)' }}>
+                Confirm
               </button>
-              <button
-                onClick={() => setPanicConfirm(false)}
-                className="flex-1 border border-[#1e3a5f] text-slate-300 text-sm py-2 rounded-lg transition-colors"
-              >
+              <button onClick={() => setPanicConfirm(false)}
+                className="flex-1 text-xs font-medium py-2 rounded border transition-colors hover:opacity-80"
+                style={{ color: 'var(--color-text-medium)', borderColor: 'var(--color-border)', background: 'var(--color-bg-surface)' }}>
                 Cancel
               </button>
             </div>
           </div>
         ) : (
-          <button
-            onClick={() => setPanicConfirm(true)}
-            className="w-full border border-red-900/50 hover:bg-red-900/20 text-red-400 text-sm py-2 rounded-lg font-medium transition-colors"
-          >
+          <button onClick={() => setPanicConfirm(true)}
+            className="w-full text-xs font-semibold py-2 rounded border transition-opacity hover:opacity-80"
+            style={{ color: 'var(--color-danger-text)', borderColor: '#FFBDAD', background: 'var(--color-danger-bg)' }}>
             PANIC: Revoke All
           </button>
         )}

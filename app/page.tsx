@@ -2,68 +2,76 @@ import Link from 'next/link';
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-[#080f1a] text-slate-100">
+    <main className="min-h-screen" style={{ background: 'var(--color-bg-page)', color: 'var(--color-text-high)' }}>
       {/* Nav */}
-      <nav className="border-b border-[#1e3a5f] px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-teal-700 rounded-lg flex items-center justify-center text-white font-bold text-sm">AG</div>
-          <span className="font-semibold text-lg tracking-tight">AgentGate</span>
+      <nav style={{ background: 'var(--color-bg-surface)', borderBottom: '1px solid var(--color-border)' }}
+        className="px-6 py-0 flex items-center justify-between h-14 sticky top-0 z-50">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded flex items-center justify-center text-white font-bold text-sm"
+            style={{ background: 'var(--color-brand)' }}>AG</div>
+          <span className="font-semibold text-base tracking-tight" style={{ color: 'var(--color-text-high)' }}>AgentGate</span>
         </div>
-        <div className="flex items-center gap-4">
-          <Link href="/api/auth/login" className="text-sm text-slate-400 hover:text-slate-100 transition-colors">
-            Login
+        <div className="flex items-center gap-3">
+          <Link href="/api/auth/login"
+            className="text-sm font-medium transition-colors"
+            style={{ color: 'var(--color-text-medium)' }}>
+            Log in
           </Link>
-          <Link href="/dashboard" className="bg-teal-700 hover:bg-teal-600 text-white text-sm px-4 py-2 rounded-lg transition-colors font-medium">
+          <Link href="/dashboard"
+            className="text-sm font-medium px-4 py-1.5 rounded text-white transition-opacity hover:opacity-90"
+            style={{ background: 'var(--color-brand)' }}>
             Open Dashboard
           </Link>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="max-w-5xl mx-auto px-6 pt-24 pb-20 text-center">
-        <div className="inline-flex items-center gap-2 bg-[#0d1829] border border-[#1e3a5f] rounded-full px-4 py-1.5 text-sm text-teal-400 mb-8">
-          <span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></span>
+      <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center">
+        <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium mb-8"
+          style={{ background: 'var(--color-brand-light)', color: 'var(--color-info-text)' }}>
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--color-brand)' }}></span>
           Built for NIST AI Agent Standards · IETF draft-klrc-aiagent-auth-00
         </div>
 
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 leading-tight">
+        <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-5 leading-tight"
+          style={{ color: 'var(--color-text-high)' }}>
           The{' '}
-          <span className="text-teal-400">missing authorization layer</span>
+          <span style={{ color: 'var(--color-brand)' }}>missing authorization layer</span>
           <br />
           for AI agents
         </h1>
 
-        <p className="text-xl text-slate-400 max-w-3xl mx-auto mb-10 leading-relaxed">
+        <p className="text-lg max-w-3xl mx-auto mb-10 leading-relaxed"
+          style={{ color: 'var(--color-text-medium)' }}>
           AgentGate is a drop-in security middleware that gives every AI agent a
           cryptographic identity, evaluates every action against user-defined policies,
           escalates sensitive requests for human approval via CIBA, and produces a
           tamper-evident audit trail — all powered by Auth0 Token Vault.
         </p>
 
-        <div className="flex items-center justify-center gap-4 flex-wrap">
-          <Link
-            href="/dashboard"
-            className="bg-teal-700 hover:bg-teal-600 text-white px-8 py-3 rounded-lg font-medium text-lg transition-colors"
-          >
+        <div className="flex items-center justify-center gap-3 flex-wrap">
+          <Link href="/dashboard"
+            className="text-white font-medium px-6 py-2.5 rounded text-sm transition-opacity hover:opacity-90"
+            style={{ background: 'var(--color-brand)' }}>
             Open Dashboard
           </Link>
-          <a
-            href="https://github.com"
-            className="border border-[#1e3a5f] hover:border-teal-700 text-slate-300 px-8 py-3 rounded-lg font-medium text-lg transition-colors"
-          >
+          <a href="https://github.com"
+            className="font-medium px-6 py-2.5 rounded text-sm transition-colors border"
+            style={{ color: 'var(--color-brand)', borderColor: 'var(--color-brand)', background: 'var(--color-bg-surface)' }}>
             View on GitHub
           </a>
         </div>
       </section>
 
       {/* Problem stat */}
-      <section className="max-w-5xl mx-auto px-6 py-16">
-        <div className="bg-[#0d1829] border border-red-900/50 rounded-xl p-8 text-center">
-          <div className="text-6xl font-bold text-red-400 mb-3">93%</div>
-          <p className="text-xl text-slate-300 font-medium mb-2">
+      <section className="max-w-5xl mx-auto px-6 py-12">
+        <div className="rounded-lg p-8 text-center border"
+          style={{ background: 'var(--color-danger-bg)', borderColor: '#FFBDAD' }}>
+          <div className="text-6xl font-bold mb-3" style={{ color: 'var(--color-danger)' }}>93%</div>
+          <p className="text-lg font-semibold mb-2" style={{ color: 'var(--color-danger-text)' }}>
             of AI agent projects use unscoped API keys
           </p>
-          <p className="text-slate-400">
+          <p style={{ color: 'var(--color-text-medium)' }}>
             No per-agent identity. No consent mechanism. No audit trail. No revocation.
             <br />
             NIST launched the AI Agent Standards Initiative in February 2026 because of this.
@@ -72,86 +80,57 @@ export default function LandingPage() {
       </section>
 
       {/* Five Gates */}
-      <section className="max-w-5xl mx-auto px-6 py-16">
-        <h2 className="text-3xl font-bold text-center mb-3">The Five Gates</h2>
-        <p className="text-slate-400 text-center mb-12">Every request. Every agent. No exceptions.</p>
+      <section className="max-w-5xl mx-auto px-6 py-12">
+        <h2 className="text-2xl font-bold text-center mb-2" style={{ color: 'var(--color-text-high)' }}>The Five Gates</h2>
+        <p className="text-center mb-10 text-sm" style={{ color: 'var(--color-text-medium)' }}>Every request. Every agent. No exceptions.</p>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
           {[
-            { num: '1', name: 'Identity', desc: 'Verify agent SPIFFE ID & OAuth token', color: 'border-blue-700/50 text-blue-400' },
-            { num: '2', name: 'Intent', desc: 'Parse AuthZEN 4-tuple: who, what, where, context', color: 'border-teal-700/50 text-teal-400' },
-            { num: '3', name: 'Policy', desc: 'Evaluate against OPA/Rego rules → ALLOW / ESCALATE / DENY', color: 'border-purple-700/50 text-purple-400' },
-            { num: '4', name: 'Consent', desc: 'Auth0 CIBA push notification for human approval', color: 'border-amber-700/50 text-amber-400' },
-            { num: '5', name: 'Token', desc: 'Issue scoped, time-limited token from Token Vault', color: 'border-emerald-700/50 text-emerald-400' },
+            { num: '1', name: 'Identity',  desc: 'Verify agent SPIFFE ID & OAuth token',                       bg: 'var(--color-info-bg)',    num_c: 'var(--color-info-text)' },
+            { num: '2', name: 'Intent',    desc: 'Parse AuthZEN 4-tuple: who, what, where, context',            bg: 'var(--color-brand-light)', num_c: 'var(--color-brand)' },
+            { num: '3', name: 'Policy',    desc: 'Evaluate rules → ALLOW / ESCALATE / DENY',                   bg: '#F3F0FF',                 num_c: '#5243AA' },
+            { num: '4', name: 'Consent',   desc: 'Auth0 CIBA push notification for human approval',            bg: 'var(--color-warning-bg)', num_c: 'var(--color-warning-text)' },
+            { num: '5', name: 'Token',     desc: 'Issue scoped, time-limited token from Token Vault',          bg: 'var(--color-success-bg)', num_c: 'var(--color-success-text)' },
           ].map((gate) => (
-            <div key={gate.num} className={`bg-[#0d1829] border ${gate.color.split(' ')[0]} rounded-xl p-5 text-center`}>
-              <div className={`text-3xl font-bold mb-2 ${gate.color.split(' ')[1]}`}>{gate.num}</div>
-              <div className="font-semibold mb-2">{gate.name}</div>
-              <div className="text-xs text-slate-400">{gate.desc}</div>
+            <div key={gate.num} className="rounded-lg p-5 text-center border"
+              style={{ background: gate.bg, borderColor: 'var(--color-border)' }}>
+              <div className="text-3xl font-bold mb-2" style={{ color: gate.num_c }}>{gate.num}</div>
+              <div className="font-semibold text-sm mb-1" style={{ color: 'var(--color-text-high)' }}>{gate.name}</div>
+              <div className="text-xs" style={{ color: 'var(--color-text-medium)' }}>{gate.desc}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* Features */}
-      <section className="max-w-5xl mx-auto px-6 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">What AgentGate Builds</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="max-w-5xl mx-auto px-6 py-12" style={{ borderTop: '1px solid var(--color-border)' }}>
+        <h2 className="text-2xl font-bold text-center mb-10" style={{ color: 'var(--color-text-high)' }}>What AgentGate Builds</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {[
-            {
-              icon: '🔑',
-              title: 'Cryptographic Agent Identity',
-              desc: 'Every agent gets a SPIFFE ID and signed JWT. Anonymous agents are rejected before they touch any resource.',
-            },
-            {
-              icon: '⚖️',
-              title: 'OPA Policy Engine',
-              desc: 'AuthZEN 4-tuple evaluation (subject + action + resource + context) with natural language policy compilation.',
-            },
-            {
-              icon: '📱',
-              title: 'CIBA Human-in-the-Loop',
-              desc: 'Sensitive actions trigger Auth0 Guardian push notifications. Users approve or deny in real-time.',
-            },
-            {
-              icon: '🏦',
-              title: 'Auth0 Token Vault',
-              desc: 'Agents never see raw OAuth tokens. Token Vault issues scoped, time-limited credentials (TTL: 60s).',
-            },
-            {
-              icon: '🔗',
-              title: 'Hash-Chained Audit Trail',
-              desc: 'SHA-256 hash chain over every decision. Tamper-evident, exportable as JSON, verifiable in-dashboard.',
-            },
-            {
-              icon: '⚡',
-              title: 'Cascade Revocation',
-              desc: 'Revoke one agent, one service, or everything (PANIC). All downstream tokens destroyed instantly.',
-            },
+            { icon: '🔑', title: 'Cryptographic Agent Identity',  desc: 'Every agent gets a SPIFFE ID and signed JWT. Anonymous agents are rejected before they touch any resource.' },
+            { icon: '⚖️', title: 'OPA Policy Engine',             desc: 'AuthZEN 4-tuple evaluation (subject + action + resource + context) with natural language policy compilation.' },
+            { icon: '📱', title: 'CIBA Human-in-the-Loop',        desc: 'Sensitive actions trigger Auth0 Guardian push notifications. Users approve or deny in real-time.' },
+            { icon: '🏦', title: 'Auth0 Token Vault',             desc: 'Agents never see raw OAuth tokens. Token Vault issues scoped, time-limited credentials (TTL: 60s).' },
+            { icon: '🔗', title: 'Hash-Chained Audit Trail',      desc: 'SHA-256 hash chain over every decision. Tamper-evident, exportable as JSON, verifiable in-dashboard.' },
+            { icon: '⚡', title: 'Cascade Revocation',            desc: 'Revoke one agent, one service, or everything (PANIC). All downstream tokens destroyed instantly.' },
           ].map((f) => (
-            <div key={f.title} className="bg-[#0d1829] border border-[#1e3a5f] rounded-xl p-6">
-              <div className="text-3xl mb-3">{f.icon}</div>
-              <h3 className="font-semibold mb-2">{f.title}</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">{f.desc}</p>
+            <div key={f.title} className="rounded-lg p-5 border"
+              style={{ background: 'var(--color-bg-surface)', borderColor: 'var(--color-border)' }}>
+              <div className="text-2xl mb-3">{f.icon}</div>
+              <h3 className="font-semibold text-sm mb-1.5" style={{ color: 'var(--color-text-high)' }}>{f.title}</h3>
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-text-medium)' }}>{f.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Standards */}
-      <section className="max-w-5xl mx-auto px-6 py-16 border-t border-[#1e3a5f]">
-        <h2 className="text-2xl font-bold text-center mb-8">Built on Real Standards</h2>
-        <div className="flex flex-wrap justify-center gap-4">
-          {[
-            'Auth0 Token Vault',
-            'Auth0 CIBA + Guardian',
-            'IETF draft-klrc-aiagent-auth-00',
-            'NIST AI Agent Standards',
-            'AuthZEN (OpenID Foundation)',
-            'SPIFFE/WIMSE',
-            'OPA (CNCF Graduated)',
-          ].map(s => (
-            <span key={s} className="bg-[#0d1829] border border-[#1e3a5f] rounded-full px-4 py-2 text-sm text-slate-300">
+      <section className="max-w-5xl mx-auto px-6 py-12" style={{ borderTop: '1px solid var(--color-border)' }}>
+        <h2 className="text-xl font-bold text-center mb-6" style={{ color: 'var(--color-text-high)' }}>Built on Real Standards</h2>
+        <div className="flex flex-wrap justify-center gap-2">
+          {['Auth0 Token Vault','Auth0 CIBA + Guardian','IETF draft-klrc-aiagent-auth-00','NIST AI Agent Standards','AuthZEN (OpenID Foundation)','SPIFFE/WIMSE','OPA (CNCF Graduated)'].map(s => (
+            <span key={s} className="rounded-full px-3 py-1 text-xs font-medium border"
+              style={{ background: 'var(--color-bg-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-medium)' }}>
               {s}
             </span>
           ))}
@@ -159,22 +138,20 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="max-w-5xl mx-auto px-6 py-20 text-center">
-        <h2 className="text-3xl font-bold mb-4">Ready to see it in action?</h2>
-        <p className="text-slate-400 mb-8">
-          Click &quot;Run Demo&quot; in the dashboard to watch three agents — CrewAI, LangGraph, and a custom script —
-          register, request access, trigger CIBA, and get cascade-revoked in real-time.
+      <section className="max-w-5xl mx-auto px-6 py-16 text-center">
+        <h2 className="text-2xl font-bold mb-3" style={{ color: 'var(--color-text-high)' }}>Ready to see it in action?</h2>
+        <p className="mb-8 text-sm" style={{ color: 'var(--color-text-medium)' }}>
+          Click &quot;Run Demo&quot; in the dashboard to watch three agents register, request access, trigger CIBA, and get cascade-revoked in real-time.
         </p>
-        <Link
-          href="/dashboard"
-          className="bg-teal-700 hover:bg-teal-600 text-white px-10 py-4 rounded-lg font-medium text-lg transition-colors inline-block"
-        >
+        <Link href="/dashboard"
+          className="text-white font-medium px-8 py-3 rounded text-sm transition-opacity hover:opacity-90 inline-block"
+          style={{ background: 'var(--color-brand)' }}>
           Open Dashboard →
         </Link>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[#1e3a5f] px-6 py-8 text-center text-sm text-slate-500">
+      <footer className="px-6 py-6 text-center text-xs" style={{ borderTop: '1px solid var(--color-border)', color: 'var(--color-text-subtle)' }}>
         <p>AgentGate · Built for the &quot;Authorized to Act: Auth0 for AI Agents&quot; Hackathon · Powered by Auth0 Token Vault</p>
         <p className="mt-1">The authorization layer the IETF left as &quot;TODO Security&quot;</p>
       </footer>
