@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getSession } from '@auth0/nextjs-auth0';
+import { auth0 } from '@/lib/auth0';
 import { runDemoScenario } from '@/lib/agents/demo-agents';
 
 export async function POST() {
-  const session = await getSession();
+  const session = await auth0.getSession();
   const userId = session?.user?.sub ?? 'demo-user';
 
   // Run scenario in background (non-blocking)

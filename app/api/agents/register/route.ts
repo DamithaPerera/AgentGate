@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@auth0/nextjs-auth0';
+import { auth0 } from '@/lib/auth0';
 import { z } from 'zod';
 import { registerAgent } from '@/lib/identity/agent-registry';
 import { logEntry } from '@/lib/audit/audit-logger';
@@ -13,7 +13,7 @@ const RegisterSchema = z.object({
 
 export async function POST(req: NextRequest) {
   // Allow unauthenticated for demo (session check is soft)
-  const session = await getSession();
+  const session = await auth0.getSession();
   const userId = session?.user?.sub ?? 'demo-user';
 
   try {

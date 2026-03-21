@@ -12,7 +12,7 @@ export default function LandingPage() {
           <span className="font-semibold text-base tracking-tight" style={{ color: 'var(--color-text-high)' }}>AgentGate</span>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/api/auth/login"
+          <Link href="/auth/login"
             className="text-sm font-medium transition-colors"
             style={{ color: 'var(--color-text-medium)' }}>
             Log in

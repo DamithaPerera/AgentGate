@@ -75,7 +75,7 @@ export default function DashboardPage() {
             style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>
             {demoRunning ? 'Running...' : '▶ Run Demo'}
           </button>
-          <Link href="/api/auth/login"
+          <Link href="/auth/login"
             className="text-xs font-medium px-3 py-1.5 rounded transition-opacity hover:opacity-90"
             style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)' }}>
             Log in
