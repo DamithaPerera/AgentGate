@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@auth0/nextjs-auth0';
+import { auth0 } from '@/lib/auth0';
 import { getAgent } from '@/lib/identity/agent-registry';
 import { revokeAgentCascade } from '@/lib/revocation/cascade-engine';
 
@@ -18,7 +18,7 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const session = await getSession();
+  const session = await auth0.getSession();
   const userId = session?.user?.sub ?? 'demo-user';
 
   const result = await revokeAgentCascade(params.id, userId);
