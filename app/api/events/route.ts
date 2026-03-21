@@ -26,7 +26,7 @@ export async function GET() {
           clearInterval(heartbeat);
           unsubscribe();
         }
-      }, 20000);
+      }, 15000);
 
       // Cleanup on close
       return () => {
