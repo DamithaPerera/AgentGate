@@ -24,7 +24,10 @@ export const storage = {
   async get(key: string): Promise<string | null> {
     const redis = getRedis();
     if (redis) {
-      return redis.get<string>(key);
+      const val = await redis.get<unknown>(key);
+      if (val === null || val === undefined) return null;
+      // Upstash auto-parses JSON — re-serialize if we got an object back
+      return typeof val === 'string' ? val : JSON.stringify(val);
     }
     const ttl = memoryTTL.get(key);
     if (ttl && Date.now() > ttl) {
@@ -105,7 +108,8 @@ export const storage = {
   async lrange(key: string, start: number, end: number): Promise<string[]> {
     const redis = getRedis();
     if (redis) {
-      return (await redis.lrange(key, start, end)) as string[];
+      const items = await redis.lrange<unknown>(key, start, end);
+      return items.map(item => typeof item === 'string' ? item : JSON.stringify(item));
     }
     const current = memoryStore.get(key);
     if (!current) return [];
