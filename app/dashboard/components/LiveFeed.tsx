@@ -2,6 +2,9 @@
 import { useState, useCallback } from 'react';
 import type { AgentEvent } from '@/lib/types';
 import { CIBACard, type CIBARequest } from './CIBACard';
+import { Pagination } from './Pagination';
+
+const PAGE_SIZE = 5;
 
 interface FeedEntry {
   id: string; timestamp: string; type: string;
@@ -32,6 +35,7 @@ function DecisionBadge({ decision }: { decision?: string }) {
 
 export function LiveFeed({ events }: Props) {
   const [cibaRequests, setCibaRequests] = useState<Record<string, CIBARequest>>({});
+  const [page, setPage] = useState(1);
 
   const handleCibaRespond = useCallback((requestId: string) => {
     setCibaRequests(prev => { const n = { ...prev }; delete n[requestId]; return n; });
@@ -60,7 +64,10 @@ export function LiveFeed({ events }: Props) {
       reason: e.data.reason as string,
       tokenTTL: e.data.tokenTTL as number,
     }))
-    .slice(0, 50);
+    .slice(0, 200);
+
+  const totalPages = Math.max(1, Math.ceil(feedEntries.length / PAGE_SIZE));
+  const pagedEntries = feedEntries.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const typeLabel: Record<string, string> = {
     agent_registered: '🤖 Registered',  agent_revoked: '⚡ Revoked',
@@ -81,7 +88,7 @@ export function LiveFeed({ events }: Props) {
           Waiting for events…<br /><span>Click ▶ Run Demo to start</span>
         </div>
       ) : (
-        feedEntries.map(entry => (
+        pagedEntries.map(entry => (
           <div key={entry.id} className="feed-entry rounded p-3 border"
             style={{ background: 'var(--color-bg-page)', borderColor: 'var(--color-border)' }}>
             <div className="flex items-start justify-between gap-2">
@@ -116,6 +123,7 @@ export function LiveFeed({ events }: Props) {
           </div>
         ))
       )}
+      <Pagination page={page} totalPages={totalPages} onPage={setPage} />
     </div>
   );
 }

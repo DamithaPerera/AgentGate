@@ -1,6 +1,9 @@
 'use client';
 import { useState } from 'react';
 import type { AuditEntry } from '@/lib/types';
+import { Pagination } from './Pagination';
+
+const PAGE_SIZE = 5;
 
 interface Props {
   entries: AuditEntry[];
@@ -26,6 +29,7 @@ function decisionColor(d: string) {
 export function AuditTrail({ entries, onExport, onVerify }: Props) {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
+  const [page, setPage] = useState(1);
   const [verifyResult, setVerifyResult] = useState<{ valid: boolean; message: string } | null>(null);
 
   const filtered = entries.filter(e => {
@@ -34,6 +38,9 @@ export function AuditTrail({ entries, onExport, onVerify }: Props) {
     return e.type.toLowerCase().includes(q) || e.agentId.toLowerCase().includes(q) ||
       e.action.toLowerCase().includes(q) || e.decision.toLowerCase().includes(q) || e.reason.toLowerCase().includes(q);
   });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pagedEntries = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleVerify = async () => {
     const result = await onVerify();
@@ -46,7 +53,7 @@ export function AuditTrail({ entries, onExport, onVerify }: Props) {
       {/* Toolbar */}
       <div className="flex gap-2 flex-shrink-0">
         <input type="text" placeholder="Filter entries…" value={filter}
-          onChange={e => setFilter(e.target.value)}
+          onChange={e => { setFilter(e.target.value); setPage(1); }}
           className="flex-1 rounded px-3 py-1.5 text-xs border focus:outline-none"
           style={{ background: 'var(--color-bg-page)', borderColor: 'var(--color-border)',
             color: 'var(--color-text-high)' }} />
@@ -80,7 +87,7 @@ export function AuditTrail({ entries, onExport, onVerify }: Props) {
           <div className="text-xs text-center py-8" style={{ color: 'var(--color-text-subtle)' }}>
             {filter ? 'No matching entries' : 'No audit entries yet'}
           </div>
-        ) : filtered.map(entry => (
+        ) : pagedEntries.map(entry => (
           <div key={entry.id} className="rounded border overflow-hidden"
             style={{ background: 'var(--color-bg-surface)', borderColor: 'var(--color-border)' }}>
             <button className="w-full text-left p-2.5 transition-colors hover:opacity-80"
@@ -145,6 +152,7 @@ export function AuditTrail({ entries, onExport, onVerify }: Props) {
           </div>
         ))}
       </div>
+      <Pagination page={page} totalPages={totalPages} onPage={setPage} />
     </div>
   );
 }

@@ -1,6 +1,9 @@
 'use client';
 import { useState } from 'react';
 import type { AgentIdentity } from '@/lib/types';
+import { Pagination } from './Pagination';
+
+const PAGE_SIZE = 5;
 
 interface Props {
   agents: AgentIdentity[];
@@ -33,7 +36,10 @@ function TrustBadge({ level }: { level: number }) {
 
 export function AgentRegistry({ agents, onRevoke, onRevokeService, onPanic }: Props) {
   const [panicConfirm, setPanicConfirm] = useState(false);
+  const [page, setPage] = useState(1);
   const activeAgents = agents.filter(a => a.status === 'active');
+  const totalPages = Math.max(1, Math.ceil(agents.length / PAGE_SIZE));
+  const pagedAgents = agents.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const services = ['github', 'gmail', 'calendar'];
   const hasService = (s: string) => activeAgents.some(a => a.capabilities.some(c => c.startsWith(s + '.')));
 
@@ -45,7 +51,7 @@ export function AgentRegistry({ agents, onRevoke, onRevokeService, onPanic }: Pr
           <div className="text-xs text-center py-8" style={{ color: 'var(--color-text-subtle)' }}>
             No agents registered yet.<br />Click ▶ Run Demo to get started.
           </div>
-        ) : agents.map(agent => (
+        ) : pagedAgents.map(agent => (
           <div key={agent.id} className="rounded p-3 border transition-all"
             style={{
               background: agent.status === 'active' ? 'var(--color-bg-page)' : 'var(--color-danger-bg)',
@@ -92,6 +98,8 @@ export function AgentRegistry({ agents, onRevoke, onRevokeService, onPanic }: Pr
           </div>
         ))}
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPage={setPage} />
 
       {/* Connected Services */}
       <div className="pt-3" style={{ borderTop: '1px solid var(--color-border)' }}>
