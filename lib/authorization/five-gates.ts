@@ -228,6 +228,7 @@ export async function authorize(request: GateRequest): Promise<AuthorizationResu
     service: request.action.service,
     scopes: [`${request.action.service}.${request.action.type}`],
     ttl: request.context?.tokenTTL ?? 60,
+    userId,
   });
 
   const auditEntry = await logEntry({
