@@ -1,5 +1,6 @@
 'use client';
 import { useState, useCallback, useEffect } from 'react';
+import { toast } from 'sonner';
 import type { AuditEntry, AgentEvent } from '@/lib/types';
 
 export function useAuditTrail() {
@@ -11,8 +12,9 @@ export function useAuditTrail() {
       const res = await fetch('/api/audit?limit=100');
       const data = await res.json() as { entries: AuditEntry[] };
       setEntries(data.entries ?? []);
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('[useAuditTrail] Failed to load audit entries:', err);
+      toast.error('Failed to load audit trail', { description: 'Check your connection and try refreshing.' });
     } finally {
       setLoading(false);
     }

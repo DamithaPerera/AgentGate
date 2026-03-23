@@ -1,6 +1,7 @@
 'use client';
 import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { AgentRegistry } from './components/AgentRegistry';
 import { LiveFeed } from './components/LiveFeed';
 import { AuditTrail } from './components/AuditTrail';
@@ -23,7 +24,10 @@ export default function DashboardPage() {
     fetch('/api/policy/rules')
       .then(r => r.json())
       .then((d: { rules: PolicyRule[] }) => setRules(d.rules ?? []))
-      .catch(() => {});
+      .catch((err) => {
+        console.error('[dashboard] Failed to load policy rules:', err);
+        toast.error('Failed to load policy rules');
+      });
   }, []);
 
   const handleEvent = useCallback((event: AgentEvent) => {
@@ -41,8 +45,10 @@ export default function DashboardPage() {
       await fetch('/api/demo/run', { method: 'POST' });
       setDemoMessage('Demo running — watch the panels!');
       setTimeout(() => setDemoMessage(''), 5000);
-    } catch {
-      setDemoMessage('Demo failed to start');
+    } catch (err) {
+      console.error('[dashboard] Demo failed to start:', err);
+      toast.error('Demo failed to start', { description: 'Check the server logs for details.' });
+      setDemoMessage('');
     } finally {
       setDemoRunning(false);
     }
