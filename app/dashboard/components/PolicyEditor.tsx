@@ -53,7 +53,7 @@ export function PolicyEditor({ rules, onRulesChange }: Props) {
   return (
     <div className="space-y-3">
       {/* Input row */}
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <input type="text"
           placeholder='e.g. "Agents can read Gmail but cannot send to external addresses"'
           value={text}
@@ -90,10 +90,19 @@ export function PolicyEditor({ rules, onRulesChange }: Props) {
               opacity: rule.enabled ? 1 : 0.55,
             }}>
             {/* Toggle */}
-            <button onClick={() => toggleRule(rule.id)}
-              className="w-8 h-4 rounded-full relative flex-shrink-0 transition-colors"
-              style={{ background: rule.enabled ? 'var(--color-brand)' : 'var(--color-border-bold)' }}>
-              <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform shadow-sm ${rule.enabled ? 'translate-x-4' : 'translate-x-0.5'}`} />
+            <button onClick={() => toggleRule(rule.id)} style={{
+                position: 'relative', flexShrink: 0, width: '2rem', height: '1rem',
+                borderRadius: '9999px', border: 'none', cursor: 'pointer',
+                background: rule.enabled ? 'var(--color-brand)' : 'var(--color-border-bold)',
+                transition: 'background 150ms',
+              }}>
+              <span style={{
+                position: 'absolute', top: '0.125rem', borderRadius: '50%',
+                width: '0.75rem', height: '0.75rem', background: '#fff',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
+                left: rule.enabled ? '1.125rem' : '0.125rem',
+                transition: 'left 150ms',
+              }} />
             </button>
             <span className="flex-1 truncate" style={{ color: 'var(--color-text-medium)' }}>{rule.name}</span>
             <span className="font-semibold flex-shrink-0" style={{ color: decisionStyle[rule.decision] ?? 'var(--color-text-low)' }}>

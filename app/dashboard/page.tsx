@@ -66,7 +66,7 @@ export default function DashboardPage() {
 
         <div className="flex items-center gap-2">
           {demoMessage && (
-            <span className="text-xs text-white opacity-90 mr-2">{demoMessage}</span>
+            <span className="text-xs text-white opacity-90 mr-2 hidden sm:inline">{demoMessage}</span>
           )}
           <button
             onClick={runDemo}
@@ -90,10 +90,11 @@ export default function DashboardPage() {
       </div>
 
       {/* 3-Panel Grid */}
-      <div className="flex-1 grid grid-cols-3 min-h-0 overflow-hidden">
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-3 min-h-0 overflow-auto md:overflow-hidden">
 
         {/* Panel 1: Agent Registry */}
-        <div className="flex flex-col overflow-hidden" style={{ borderRight: '1px solid var(--color-border)' }}>
+        <div className="flex flex-col min-h-96 md:min-h-0 md:overflow-hidden border-b md:border-b-0 md:border-r"
+          style={{ borderColor: 'var(--color-border)' }}>
           <div className="px-4 py-2.5 flex items-center justify-between flex-shrink-0"
             style={{ background: 'var(--color-bg-sunken)', borderBottom: '1px solid var(--color-border)' }}>
             <div>
@@ -115,7 +116,8 @@ export default function DashboardPage() {
         </div>
 
         {/* Panel 2: Live Feed */}
-        <div className="flex flex-col overflow-hidden" style={{ borderRight: '1px solid var(--color-border)' }}>
+        <div className="flex flex-col min-h-96 md:min-h-0 md:overflow-hidden border-b md:border-b-0 md:border-r"
+          style={{ borderColor: 'var(--color-border)' }}>
           <div className="px-4 py-2.5 flex items-center justify-between flex-shrink-0"
             style={{ background: 'var(--color-bg-sunken)', borderBottom: '1px solid var(--color-border)' }}>
             <div>
@@ -133,7 +135,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Panel 3: Audit Trail */}
-        <div className="flex flex-col overflow-hidden">
+        <div className="flex flex-col min-h-96 md:min-h-0 md:overflow-hidden">
           <div className="px-4 py-2.5 flex items-center justify-between flex-shrink-0"
             style={{ background: 'var(--color-bg-sunken)', borderBottom: '1px solid var(--color-border)' }}>
             <div>
@@ -155,7 +157,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Status bar */}
-      <div className="px-4 py-1.5 flex items-center gap-4 text-xs flex-shrink-0"
+      <div className="px-4 py-1.5 hidden sm:flex items-center gap-4 text-xs flex-shrink-0"
         style={{ background: 'var(--color-bg-sunken)', borderTop: '1px solid var(--color-border)', color: 'var(--color-text-subtle)' }}>
         <span>AgentGate v0.1 · Auth0 Token Vault · OPA Policy Engine · CIBA Consent</span>
         <span className="ml-auto">Authorized to Act: Auth0 for AI Agents Hackathon</span>
