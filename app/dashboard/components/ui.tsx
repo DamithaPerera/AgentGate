@@ -2,7 +2,6 @@
 import React from 'react';
 
 // ─── Badge ────────────────────────────────────────────────────────────────────
-// Colored rounded pill. Pass dynamic colors via `style`; static variants via `className`.
 export function Badge({
   children,
   className = '',
@@ -14,8 +13,11 @@ export function Badge({
 }) {
   return (
     <span
-      className={`text-[11px] px-[7px] py-0.5 rounded-full font-semibold shrink-0 ${className}`}
-      style={style}
+      className={`text-[10px] px-[7px] py-[3px] rounded-full font-semibold shrink-0 tracking-[0.04em] ${className}`}
+      style={{
+        fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace',
+        ...style,
+      }}
     >
       {children}
     </span>
@@ -23,8 +25,6 @@ export function Badge({
 }
 
 // ─── StatusDot ────────────────────────────────────────────────────────────────
-// Small dot. `color` is a runtime value so passed as inline style.
-// `pulse` adds the Tailwind animate-pulse class.
 export function StatusDot({
   color,
   pulse = false,
@@ -34,70 +34,79 @@ export function StatusDot({
   pulse?: boolean;
   size?: 'sm' | 'md';
 }) {
-  const dim = size === 'sm' ? 'w-[5px] h-[5px]' : 'w-1.5 h-1.5';
+  const dim = size === 'sm' ? 'w-[6px] h-[6px]' : 'w-[6px] h-[6px]';
   return (
     <span
-      className={`${dim} rounded-full inline-block shrink-0 ${pulse ? 'animate-pulse' : ''}`}
+      className={`${dim} rounded-full inline-block shrink-0 ${pulse ? 'animate-pulse-dot' : ''}`}
       style={{ background: color }}
     />
   );
 }
 
 // ─── AgentDot ─────────────────────────────────────────────────────────────────
-// The agent status dot with optional glow — used next to agent names.
 export function AgentDot({ active }: { active: boolean }) {
   return (
     <span
-      className="w-[7px] h-[7px] rounded-full inline-block shrink-0"
+      className="w-[8px] h-[8px] rounded-full inline-block shrink-0"
       style={{
-        background: active ? '#16A34A' : '#DC2626',
-        boxShadow: active ? '0 0 6px rgba(22,163,74,0.5)' : 'none',
+        background: active ? '#12b76a' : '#9498b3',
+        boxShadow: active ? '0 0 6px rgba(18,183,106,0.45)' : 'none',
       }}
     />
   );
 }
 
 // ─── IconBox ──────────────────────────────────────────────────────────────────
-// Small rounded square containing an emoji/icon. `bgClass` defaults to a light blue tint.
 export function IconBox({
   icon,
-  bgClass = 'bg-[#EFF6FF]',
+  bgClass = 'bg-[#ebf0ff]',
   size = 'md',
+  variant,
 }: {
   icon: string;
   bgClass?: string;
   size?: 'sm' | 'md';
+  variant?: 'blue' | 'orange' | 'purple' | 'green' | 'red';
 }) {
-  const dims = size === 'sm' ? 'w-6 h-6 text-xs' : 'w-7 h-7 text-sm';
+  const variantBg: Record<string, string> = {
+    blue:   'bg-[#ebf0ff]',
+    orange: 'bg-[#fefce8]',
+    purple: 'bg-[#f3f0ff]',
+    green:  'bg-[#e7faf0]',
+    red:    'bg-[#fef2f2]',
+  };
+  const resolvedBg = variant ? variantBg[variant] : bgClass;
+  const dims = size === 'sm' ? 'w-[26px] h-[26px] text-xs' : 'w-[30px] h-[30px] text-sm';
   return (
-    <div className={`${dims} rounded-md ${bgClass} flex items-center justify-center`}>
+    <div className={`${dims} rounded-[8px] ${resolvedBg} flex items-center justify-center shrink-0`}>
       {icon}
     </div>
   );
 }
 
 // ─── SectionHeader ────────────────────────────────────────────────────────────
-// Panel header: IconBox + bold title + muted subtitle, with an optional right-side badge/slot.
 export function SectionHeader({
   icon,
   iconBgClass,
+  iconVariant,
   title,
   subtitle,
   right,
 }: {
   icon: string;
   iconBgClass?: string;
+  iconVariant?: 'blue' | 'orange' | 'purple' | 'green' | 'red';
   title: string;
   subtitle?: string;
   right?: React.ReactNode;
 }) {
   return (
-    <div className="px-4 py-3.5 bg-white border-b border-[#E2E8F0] flex items-center justify-between shrink-0">
-      <div className="flex items-center gap-2">
-        <IconBox icon={icon} bgClass={iconBgClass} />
+    <div className="px-5 py-3.5 bg-[#f0f1f7] border-b border-[#e2e4ef] flex items-center justify-between shrink-0 rounded-t-[14px]">
+      <div className="flex items-center gap-2.5">
+        <IconBox icon={icon} bgClass={iconBgClass} variant={iconVariant} />
         <div>
-          <div className="font-bold text-[13px] text-[#0F172A]">{title}</div>
-          {subtitle && <div className="text-[11px] text-[#64748B] mt-px">{subtitle}</div>}
+          <div className="font-semibold text-[13px] text-[#1a1d2e]">{title}</div>
+          {subtitle && <div className="text-[11px] text-[#9498b3] mt-px">{subtitle}</div>}
         </div>
       </div>
       {right && <div>{right}</div>}
@@ -106,7 +115,6 @@ export function SectionHeader({
 }
 
 // ─── LivePill ─────────────────────────────────────────────────────────────────
-// The small LIVE / SSE / tamper-evident pill shown in panel headers.
 export function LivePill({
   dotColor,
   textColor,
@@ -123,39 +131,44 @@ export function LivePill({
   showDot?: boolean;
 }) {
   return (
-    <div className={`flex items-center gap-1.5 ${bgClass} ${borderClass} border rounded-full px-2 py-[3px]`}>
+    <div className={`flex items-center gap-1.5 ${bgClass} ${borderClass} border rounded-full px-2.5 py-[4px]`}>
       {showDot && dotColor && (
         <StatusDot color={dotColor} pulse size="sm" />
       )}
-      <span className={`text-[11px] ${textColor} font-semibold`}>{label}</span>
+      <span
+        className={`text-[10px] ${textColor} font-semibold tracking-[0.05em]`}
+        style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+      >
+        {label}
+      </span>
     </div>
   );
 }
 
 // ─── EmptyState ───────────────────────────────────────────────────────────────
-// Centered placeholder message with an optional secondary hint.
 export function EmptyState({
   message,
   hint,
+  icon,
 }: {
   message: string;
   hint?: React.ReactNode;
+  icon?: string;
 }) {
   return (
-    <div className="text-center px-4 py-8 text-[#475569] text-[13px]">
-      {message}
+    <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+      {icon && (
+        <div className="text-3xl mb-3 opacity-25">{icon}</div>
+      )}
+      <div className="text-[13px] text-[#9498b3] font-medium">{message}</div>
       {hint && (
-        <>
-          <br />
-          <span className="text-xs">{hint}</span>
-        </>
+        <div className="text-[11px] text-[#9498b3] mt-1">{hint}</div>
       )}
     </div>
   );
 }
 
 // ─── StatusBanner ─────────────────────────────────────────────────────────────
-// Success / error result banner. Colors are driven by the `type` prop.
 export function StatusBanner({
   type,
   text,
@@ -168,11 +181,12 @@ export function StatusBanner({
   const isSuccess = type === 'success';
   return (
     <div
-      className={`text-xs px-3 py-[7px] rounded-lg font-semibold shrink-0 ${className}`}
+      className={`text-xs px-3 py-[7px] rounded-[6px] font-semibold shrink-0 ${className}`}
       style={{
-        background: isSuccess ? '#F0FDF4' : '#FFF1F2',
-        color: isSuccess ? '#16A34A' : '#DC2626',
-        border: `1px solid ${isSuccess ? '#BBF7D0' : '#FECDD3'}`,
+        background: isSuccess ? '#e7faf0' : '#fef2f2',
+        color: isSuccess ? '#12b76a' : '#ef4444',
+        border: `1px solid ${isSuccess ? '#12b76a33' : '#ef444433'}`,
+        fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace',
       }}
     >
       {isSuccess ? '✓' : '✗'} {text}
@@ -181,7 +195,6 @@ export function StatusBanner({
 }
 
 // ─── RevokeButton ─────────────────────────────────────────────────────────────
-// Standard red revoke button. `small` renders a more compact variant.
 export function RevokeButton({
   onClick,
   small = false,
@@ -193,7 +206,8 @@ export function RevokeButton({
     return (
       <button
         onClick={onClick}
-        className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[#FFF1F2] text-[#DC2626] border border-[#FECDD3] cursor-pointer"
+        className="text-[10px] font-semibold px-2 py-[3px] rounded-[6px] bg-[#fef2f2] text-[#ef4444] border border-[#ef444420] cursor-pointer hover:bg-[#fee2e2] transition-colors"
+        style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
       >
         Revoke
       </button>
@@ -202,7 +216,8 @@ export function RevokeButton({
   return (
     <button
       onClick={onClick}
-      className="text-[11px] font-semibold px-2.5 py-1 rounded-md bg-[#FFF1F2] text-[#DC2626] border border-[#FECDD3] cursor-pointer shrink-0 whitespace-nowrap"
+      className="text-[11px] font-semibold px-2.5 py-[5px] rounded-[6px] bg-[#fef2f2] text-[#ef4444] border border-[#ef444420] cursor-pointer shrink-0 whitespace-nowrap hover:bg-[#fee2e2] transition-colors"
+      style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
     >
       Revoke
     </button>
@@ -210,7 +225,6 @@ export function RevokeButton({
 }
 
 // ─── Toggle ───────────────────────────────────────────────────────────────────
-// Animated toggle switch. All positioning is inline style because it's dynamic geometry.
 export function Toggle({
   enabled,
   onChange,
@@ -224,25 +238,26 @@ export function Toggle({
       style={{
         position: 'relative',
         flexShrink: 0,
-        width: '2rem',
-        height: '1rem',
+        width: '40px',
+        height: '22px',
         borderRadius: 999,
         border: 'none',
         cursor: 'pointer',
-        background: enabled ? '#0052CC' : '#334155',
+        background: enabled ? '#3b6cff' : '#d0d3e2',
         transition: 'background 150ms',
+        padding: 0,
       }}
     >
       <span
         style={{
           position: 'absolute',
-          top: '0.125rem',
+          top: '3px',
           borderRadius: '50%',
-          width: '0.75rem',
-          height: '0.75rem',
+          width: '16px',
+          height: '16px',
           background: '#fff',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-          left: enabled ? '1.125rem' : '0.125rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.18)',
+          left: enabled ? '21px' : '3px',
           transition: 'left 150ms',
         }}
       />
@@ -251,7 +266,6 @@ export function Toggle({
 }
 
 // ─── FilterInput ──────────────────────────────────────────────────────────────
-// Standard search / filter text input.
 export function FilterInput({
   value,
   onChange,
@@ -269,7 +283,12 @@ export function FilterInput({
       placeholder={placeholder}
       value={value}
       onChange={e => onChange(e.target.value)}
-      className={`flex-1 rounded-lg px-3 py-[7px] text-xs border border-[#E2E8F0] bg-white text-[#0F172A] outline-none min-w-0 ${className}`}
+      className={`flex-1 rounded-[10px] px-3 py-[7px] text-xs border border-[#e2e4ef] bg-[#f0f1f7] text-[#1a1d2e] outline-none min-w-0 placeholder:text-[#9498b3] focus:border-[#3b6cff] transition-colors ${className}`}
+      style={{
+        boxShadow: 'none',
+      }}
+      onFocus={e => { e.target.style.boxShadow = '0 0 0 3px rgba(59,108,255,0.12)'; }}
+      onBlur={e => { e.target.style.boxShadow = 'none'; }}
     />
   );
 }

@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 import type { AgentEvent } from '@/lib/types';
 import { CIBACard, type CIBARequest } from './CIBACard';
 import { Pagination } from './Pagination';
-import { Badge, EmptyState } from './ui';
+import { Badge, StatusDot, EmptyState } from './ui';
 
 const PAGE_SIZE = 5;
 
@@ -15,25 +15,25 @@ interface FeedEntry {
 
 interface Props { events: AgentEvent[]; isLoggedIn?: boolean; }
 
-const DECISION_STYLES: Record<string, { bg: string; color: string; icon: string }> = {
-  ALLOWED:       { bg: '#F0FDF4', color: '#16A34A', icon: '✓' },
-  APPROVED_CIBA: { bg: '#F0FDF4', color: '#16A34A', icon: '✓' },
-  DENIED:        { bg: '#FFF1F2', color: '#DC2626', icon: '✗' },
-  ESCALATED:     { bg: '#FFFBEB', color: '#D97706', icon: '⚠' },
-  REVOKED:       { bg: '#FFF1F2', color: '#DC2626', icon: '⚡' },
+const DECISION_STYLES: Record<string, { bg: string; color: string; border: string; dot: string }> = {
+  ALLOWED:       { bg: '#e7faf0', color: '#12b76a', border: '#12b76a33', dot: '#12b76a' },
+  APPROVED_CIBA: { bg: '#e7faf0', color: '#12b76a', border: '#12b76a33', dot: '#12b76a' },
+  DENIED:        { bg: '#fef2f2', color: '#ef4444', border: '#ef444433', dot: '#ef4444' },
+  ESCALATED:     { bg: '#fefce8', color: '#f59e0b', border: '#f59e0b33', dot: '#f59e0b' },
+  REVOKED:       { bg: '#fef2f2', color: '#ef4444', border: '#ef444433', dot: '#ef4444' },
 };
 
-const TYPE_LABELS: Record<string, { label: string; bg: string; color: string }> = {
-  agent_registered: { label: '🤖 Registered',     bg: '#EFF6FF', color: '#1D4ED8' },
-  agent_revoked:    { label: '⚡ Revoked',         bg: '#FFF1F2', color: '#DC2626' },
-  auth_request:     { label: '🔒 Auth Request',    bg: '#F8FAFC', color: '#374151' },
-  ciba_approved:    { label: '✓ CIBA Approved',    bg: '#F0FDF4', color: '#16A34A' },
-  ciba_denied:      { label: '✗ CIBA Denied',      bg: '#FFF1F2', color: '#DC2626' },
-  ciba_expired:     { label: '⏱ CIBA Expired',    bg: '#FFFBEB', color: '#D97706' },
-  token_issued:     { label: '🎫 Token Issued',    bg: '#F0FDF4', color: '#15803D' },
-  revocation:       { label: '⚡ Revocation',       bg: '#FFF1F2', color: '#DC2626' },
-  panic_revocation: { label: '🚨 PANIC',            bg: '#FFF1F2', color: '#991B1B' },
-  audit_entry:      { label: '📋 Audit',            bg: '#F5F3FF', color: '#7C3AED' },
+const TYPE_LABELS: Record<string, { label: string; dot: string }> = {
+  agent_registered: { label: 'Registered',   dot: '#3b6cff' },
+  agent_revoked:    { label: 'Revoked',       dot: '#ef4444' },
+  auth_request:     { label: 'Auth Request',  dot: '#9498b3' },
+  ciba_approved:    { label: 'CIBA Approved', dot: '#12b76a' },
+  ciba_denied:      { label: 'CIBA Denied',   dot: '#ef4444' },
+  ciba_expired:     { label: 'CIBA Expired',  dot: '#f59e0b' },
+  token_issued:     { label: 'Token Issued',  dot: '#12b76a' },
+  revocation:       { label: 'Revocation',    dot: '#ef4444' },
+  panic_revocation: { label: 'PANIC',         dot: '#ef4444' },
+  audit_entry:      { label: 'Audit',         dot: '#8b5cf6' },
 };
 
 export function LiveFeed({ events, isLoggedIn }: Props) {
@@ -73,43 +73,71 @@ export function LiveFeed({ events, isLoggedIn }: Props) {
   const pagedEntries = feedEntries.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <div className="flex flex-col h-full gap-1.5">
+    <div className="flex flex-col h-full">
       {Object.values(cibaRequests).map(req => (
         <CIBACard key={req.requestId} request={req} onRespond={handleCibaRespond} />
       ))}
 
-      <div className="flex-1 overflow-y-auto flex flex-col gap-[5px] min-h-0">
+      <div className="flex-1 overflow-y-auto min-h-0">
         {feedEntries.length === 0 && Object.keys(cibaRequests).length === 0 ? (
           <EmptyState
+            icon="⚡"
             message="Waiting for events…"
-            hint={!isLoggedIn ? 'Click ▶ Run Demo to start' : undefined}
+            hint={!isLoggedIn ? 'Click Run Demo to start' : undefined}
           />
-        ) : pagedEntries.map(entry => {
-          const typeInfo = TYPE_LABELS[entry.type] ?? { label: entry.type, bg: '#F8FAFC', color: '#374151' };
+        ) : pagedEntries.map((entry, idx) => {
+          const typeInfo = TYPE_LABELS[entry.type] ?? { label: entry.type, dot: '#9498b3' };
           const decisionStyle = entry.decision ? DECISION_STYLES[entry.decision] : null;
+          const isLast = idx === pagedEntries.length - 1;
           return (
-            <div key={entry.id} className="feed-entry bg-white border border-[#E2E8F0] rounded-[10px] px-3 py-2.5">
-              <div className="flex items-start justify-between gap-2">
+            <div
+              key={entry.id}
+              className="feed-entry px-5 py-3.5 transition-colors hover:bg-[#eceef5]"
+              style={{ borderBottom: isLast ? 'none' : '1px solid #e2e4ef' }}
+            >
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Badge style={{ background: typeInfo.bg, color: typeInfo.color }}>
+                  {/* Type + time row */}
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <StatusDot color={typeInfo.dot} size="sm" />
+                    <span
+                      className="text-[11px] font-medium text-[#5c6078]"
+                      style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+                    >
                       {typeInfo.label}
-                    </Badge>
-                    <span className="text-[10px] text-[#94A3B8] font-mono">{new Date(entry.timestamp).toLocaleTimeString()}</span>
+                    </span>
+                    <span
+                      className="text-[10px] text-[#9498b3]"
+                      style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+                    >
+                      {new Date(entry.timestamp).toLocaleTimeString()}
+                    </span>
                   </div>
+                  {/* Content */}
                   {entry.agentName && (
-                    <div className="text-xs font-semibold text-[#0F172A] mb-0.5 truncate">{entry.agentName}</div>
+                    <div className="text-[12px] font-semibold text-[#1a1d2e] mb-0.5 truncate">{entry.agentName}</div>
                   )}
                   {entry.action && (
-                    <div className="text-[11px] text-[#64748B] font-mono mb-0.5">{entry.action}</div>
+                    <div
+                      className="text-[11px] text-[#5c6078] truncate"
+                      style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+                    >
+                      {entry.action}
+                    </div>
                   )}
                   {entry.tokenTTL && (
-                    <div className="text-[11px] text-[#16A34A] font-semibold">TTL: {entry.tokenTTL}s</div>
+                    <div className="text-[11px] text-[#12b76a] font-semibold mt-0.5">TTL: {entry.tokenTTL}s</div>
                   )}
                 </div>
                 {decisionStyle && (
-                  <Badge style={{ background: decisionStyle.bg, color: decisionStyle.color }} className="font-bold px-2 py-[3px]">
-                    {decisionStyle.icon} {entry.decision}
+                  <Badge
+                    style={{
+                      background: decisionStyle.bg,
+                      color: decisionStyle.color,
+                      border: `1px solid ${decisionStyle.border}`,
+                    }}
+                  >
+                    {entry.decision}
                   </Badge>
                 )}
               </div>

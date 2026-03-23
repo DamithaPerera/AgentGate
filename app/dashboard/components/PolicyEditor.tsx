@@ -45,51 +45,68 @@ export function PolicyEditor({ rules, onRulesChange }: Props) {
     onRulesChange(updated);
   };
 
-  const decisionColors: Record<string, { color: string; bg: string }> = {
-    ALLOW:    { color: '#16A34A', bg: '#F0FDF4' },
-    ESCALATE: { color: '#D97706', bg: '#FFFBEB' },
-    DENY:     { color: '#DC2626', bg: '#FFF1F2' },
+  const decisionStyle = (decision: string): { color: string; bg: string; border: string } => {
+    if (decision === 'ALLOW')    return { color: '#12b76a', bg: '#e7faf0', border: '#12b76a33' };
+    if (decision === 'ESCALATE') return { color: '#f59e0b', bg: '#fefce8', border: '#f59e0b33' };
+    if (decision === 'DENY')     return { color: '#ef4444', bg: '#fef2f2', border: '#ef444433' };
+    return { color: '#5c6078', bg: '#f0f1f7', border: '#e2e4ef' };
   };
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-3">
       {/* Input row */}
       <div className="flex gap-2">
-        <input type="text"
+        <input
+          type="text"
           placeholder='e.g. "Agents can read Gmail but cannot send to external addresses"'
           value={text}
           onChange={e => setText(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleCompile()}
-          className="flex-1 rounded-lg px-3.5 py-2 text-[13px] border border-[#E2E8F0] bg-white text-[#0F172A] outline-none min-w-0" />
-        <button onClick={handleCompile} disabled={compiling || !text.trim()}
-          className="px-[18px] py-2 rounded-lg text-white font-semibold text-[13px] border-none cursor-pointer whitespace-nowrap"
+          className="flex-1 rounded-[10px] px-3.5 py-2 text-[13px] border border-[#e2e4ef] bg-[#f0f1f7] text-[#1a1d2e] outline-none min-w-0 placeholder:text-[#9498b3] focus:border-[#3b6cff] transition-colors"
+          onFocus={e => { e.target.style.boxShadow = '0 0 0 3px rgba(59,108,255,0.12)'; }}
+          onBlur={e => { e.target.style.boxShadow = 'none'; }}
+        />
+        <button
+          onClick={handleCompile}
+          disabled={compiling || !text.trim()}
+          className="px-5 py-2 rounded-[10px] text-white font-semibold text-[13px] border-none cursor-pointer whitespace-nowrap transition-opacity"
           style={{
-            background: 'linear-gradient(135deg, #0052CC, #0065FF)',
+            background: 'linear-gradient(135deg, #3b6cff, #6b8fff)',
             opacity: (compiling || !text.trim()) ? 0.5 : 1,
-            boxShadow: '0 2px 8px rgba(0,82,204,0.3)',
-          }}>
+            boxShadow: '0 2px 8px rgba(59,108,255,0.28)',
+          }}
+        >
           {compiling ? '…' : 'Apply'}
         </button>
       </div>
 
       {message && (
-        <StatusBanner type={message.type} text={message.text} className="py-1.5 rounded-md" />
+        <StatusBanner type={message.type} text={message.text} className="py-1.5" />
       )}
 
       {/* Rules list */}
-      <div className="flex flex-col gap-1 max-h-40 overflow-y-auto">
-        {rules.map(rule => {
-          const dc = decisionColors[rule.decision] ?? { color: '#64748B', bg: '#F8FAFC' };
+      <div className="flex flex-col max-h-40 overflow-y-auto">
+        {rules.map((rule, idx) => {
+          const ds = decisionStyle(rule.decision);
+          const isLast = idx === rules.length - 1;
           return (
-            <div key={rule.id}
-              className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] transition-opacity"
+            <div
+              key={rule.id}
+              className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[#eceef5]"
               style={{
-                background: rule.enabled ? '#fff' : '#F8FAFC',
-                opacity: rule.enabled ? 1 : 0.55,
-              }}>
+                borderBottom: isLast ? 'none' : '1px solid #e2e4ef',
+                opacity: rule.enabled ? 1 : 0.5,
+              }}
+            >
               <Toggle enabled={rule.enabled} onChange={() => toggleRule(rule.id)} />
-              <span className="flex-1 text-xs text-[#374151] truncate">{rule.name}</span>
-              <Badge style={{ color: dc.color, background: dc.bg }} className="font-bold px-2 py-0.5">
+              <span className="flex-1 text-[12px] text-[#1a1d2e] truncate">{rule.name}</span>
+              <Badge
+                style={{
+                  color: ds.color,
+                  background: ds.bg,
+                  border: `1px solid ${ds.border}`,
+                }}
+              >
                 {rule.decision}
               </Badge>
             </div>
