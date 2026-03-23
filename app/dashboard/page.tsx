@@ -16,6 +16,16 @@ export default function DashboardPage() {
   const [rules, setRules] = useState<PolicyRule[]>([]);
   const [demoRunning, setDemoRunning] = useState(false);
   const [demoMessage, setDemoMessage] = useState('');
+  const [userName, setUserName] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/me')
+      .then(r => r.json())
+      .then((d: { user: { name?: string; email?: string; picture?: string } | null }) => {
+        if (d.user) setUserName(d.user.name ?? d.user.email ?? null);
+      })
+      .catch(() => {});
+  }, []);
 
   const registry = useAgentRegistry();
   const audit = useAuditTrail();
@@ -81,10 +91,16 @@ export default function DashboardPage() {
             style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>
             {demoRunning ? 'Running...' : '▶ Run Demo'}
           </button>
+          {userName && (
+            <span className="text-xs text-white opacity-80 hidden sm:inline px-2 py-1 rounded"
+              style={{ background: 'rgba(255,255,255,0.1)' }}>
+              {userName}
+            </span>
+          )}
           <Link href="/auth/logout"
             className="text-xs font-medium px-3 py-1.5 rounded transition-opacity hover:opacity-90"
             style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)' }}>
-            Log out
+            {userName ? 'Log out' : 'Log in'}
           </Link>
         </div>
       </header>
