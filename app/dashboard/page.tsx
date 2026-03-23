@@ -84,13 +84,15 @@ export default function DashboardPage() {
           {demoMessage && (
             <span className="text-xs text-white opacity-90 mr-2 hidden sm:inline">{demoMessage}</span>
           )}
-          <button
-            onClick={runDemo}
-            disabled={demoRunning}
-            className="text-xs font-semibold px-3 py-1.5 rounded disabled:opacity-50 transition-opacity hover:opacity-90"
-            style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>
-            {demoRunning ? 'Running...' : '▶ Run Demo'}
-          </button>
+          {!userName && (
+            <button
+              onClick={runDemo}
+              disabled={demoRunning}
+              className="text-xs font-semibold px-3 py-1.5 rounded disabled:opacity-50 transition-opacity hover:opacity-90"
+              style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>
+              {demoRunning ? 'Running...' : '▶ Run Demo'}
+            </button>
+          )}
           {userName && (
             <span className="text-xs text-white opacity-80 hidden sm:inline px-2 py-1 rounded"
               style={{ background: 'rgba(255,255,255,0.1)' }}>
