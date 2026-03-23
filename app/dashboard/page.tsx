@@ -21,7 +21,7 @@ export default function DashboardPage() {
   useEffect(() => {
     fetch('/api/me')
       .then(r => r.json())
-      .then((d: { user: { name?: string; email?: string; picture?: string } | null }) => {
+      .then((d: { user: { name?: string; email?: string } | null }) => {
         if (d.user) setUserName(d.user.name ?? d.user.email ?? null);
       })
       .catch(() => {});
@@ -64,72 +64,91 @@ export default function DashboardPage() {
     }
   };
 
+  const activeCount = registry.agents.filter(a => a.status === 'active').length;
+
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg-page)', color: 'var(--color-text-high)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F8FAFC', fontFamily: 'Inter, -apple-system, sans-serif' }}>
 
-      {/* Top navigation bar — Atlassian style */}
-      <header className="flex items-center justify-between px-4 h-12 flex-shrink-0 z-50"
-        style={{ background: 'var(--color-brand)', color: '#fff' }}>
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-white rounded flex items-center justify-center font-bold text-xs"
-              style={{ color: 'var(--color-brand)' }}>AG</div>
-            <span className="font-semibold text-sm text-white">AgentGate</span>
-          </Link>
-          <span className="opacity-40 text-white">|</span>
-          <span className="text-xs text-white opacity-75">Security Dashboard</span>
-        </div>
+      {/* ── Header ──────────────────────────────────────────────── */}
+      <header style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', flexShrink: 0, zIndex: 50, borderBottom: '1px solid #E2E8F0' }}>
+        <div style={{ maxWidth: '100%', padding: '0 20px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          {/* Left */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, #3B82F6, #0052CC)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 12 }}>AG</div>
+              <span style={{ fontWeight: 700, fontSize: 15, color: '#0F172A' }}>AgentGate</span>
+            </Link>
+            <div style={{ width: 1, height: 20, background: '#E2E8F0' }} />
+            <span style={{ fontSize: 13, color: '#64748B', fontWeight: 500 }}>Security Dashboard</span>
+          </div>
 
-        <div className="flex items-center gap-2">
-          {demoMessage && (
-            <span className="text-xs text-white opacity-90 mr-2 hidden sm:inline">{demoMessage}</span>
-          )}
-          {!userName && (
-            <button
-              onClick={runDemo}
-              disabled={demoRunning}
-              className="text-xs font-semibold px-3 py-1.5 rounded disabled:opacity-50 transition-opacity hover:opacity-90"
-              style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>
-              {demoRunning ? 'Running...' : '▶ Run Demo'}
-            </button>
-          )}
-          {userName && (
-            <span className="text-xs text-white opacity-80 hidden sm:inline px-2 py-1 rounded"
-              style={{ background: 'rgba(255,255,255,0.1)' }}>
-              {userName}
-            </span>
-          )}
-          <Link href="/auth/logout"
-            className="text-xs font-medium px-3 py-1.5 rounded transition-opacity hover:opacity-90"
-            style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)' }}>
-            {userName ? 'Log out' : 'Log in'}
-          </Link>
+          {/* Center — status badges */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 999, padding: '4px 10px' }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16A34A', display: 'inline-block' }} className="animate-pulse" />
+              <span style={{ fontSize: 12, color: '#15803D', fontWeight: 500 }}>{activeCount} active</span>
+            </div>
+            {demoMessage && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 999, padding: '4px 10px' }}>
+                <span style={{ fontSize: 12, color: '#1D4ED8', fontWeight: 500 }}>{demoMessage}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Right */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {!userName && (
+              <button onClick={runDemo} disabled={demoRunning}
+                style={{ padding: '6px 14px', borderRadius: 8, background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE', fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: demoRunning ? 0.5 : 1 }}>
+                {demoRunning ? '⟳ Running...' : '▶ Run Demo'}
+              </button>
+            )}
+            {userName && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8, padding: '5px 12px' }}>
+                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #3B82F6, #0052CC)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff' }}>
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+                <span style={{ fontSize: 13, color: '#374151', fontWeight: 500, maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{userName}</span>
+              </div>
+            )}
+            <Link href={userName ? '/auth/logout' : '/auth/login?returnTo=/dashboard'}
+              style={{ padding: '6px 14px', borderRadius: 8, background: userName ? '#FFF1F2' : 'linear-gradient(135deg, #0052CC, #0065FF)', color: userName ? '#DC2626' : '#fff', border: userName ? '1px solid #FECDD3' : 'none', fontSize: 13, fontWeight: 600, textDecoration: 'none', boxShadow: userName ? 'none' : '0 2px 8px rgba(0,82,204,0.3)' }}>
+              {userName ? 'Log out' : 'Log in'}
+            </Link>
+          </div>
         </div>
       </header>
 
-      {/* Policy Editor Bar */}
-      <div className="px-4 py-3 flex-shrink-0" style={{ background: 'var(--color-bg-surface)', borderBottom: '1px solid var(--color-border)' }}>
-        <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--color-text-low)' }}>Policy Engine</div>
+      {/* ── Policy Engine bar ────────────────────────────────────── */}
+      <div style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', padding: '16px 20px', flexShrink: 0 }}>
+        <div style={{ maxWidth: '100%', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 6, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>⚖️</div>
+          <span style={{ fontWeight: 700, fontSize: 13, color: '#0F172A' }}>Policy Engine</span>
+          <span style={{ fontSize: 12, color: '#64748B', background: '#F1F5F9', padding: '2px 8px', borderRadius: 999, border: '1px solid #E2E8F0' }}>{rules.length} rules active</span>
+        </div>
         <PolicyEditor rules={rules} onRulesChange={setRules} />
       </div>
 
-      {/* 3-Panel Grid */}
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-3 min-h-0 overflow-auto md:overflow-hidden">
+      {/* ── 3-Panel Grid ─────────────────────────────────────────── */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', minHeight: 0, overflow: 'auto' }}
+        className="md:overflow-hidden md:grid-cols-3">
 
-        {/* Panel 1: Agent Registry */}
-        <div className="flex flex-col min-h-96 md:min-h-0 md:overflow-hidden border-b md:border-b-0 md:border-r"
-          style={{ borderColor: 'var(--color-border)' }}>
-          <div className="px-4 py-2.5 flex items-center justify-between flex-shrink-0"
-            style={{ background: 'var(--color-bg-sunken)', borderBottom: '1px solid var(--color-border)' }}>
-            <div>
-              <h2 className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-medium)' }}>Agent Registry</h2>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-low)' }}>
-                {registry.agents.filter(a => a.status === 'active').length} active
-              </p>
+        {/* Panel 1 — Agent Registry */}
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: 400, borderRight: '1px solid #E2E8F0' }}>
+          <div style={{ padding: '14px 16px', background: '#fff', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 6, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>🤖</div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 13, color: '#0F172A' }}>Agent Registry</div>
+                <div style={{ fontSize: 11, color: '#64748B', marginTop: 1 }}>{activeCount} of {registry.agents.length} active</div>
+              </div>
             </div>
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-success)' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 999, padding: '3px 8px' }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#16A34A', display: 'inline-block' }} className="animate-pulse" />
+              <span style={{ fontSize: 11, color: '#16A34A', fontWeight: 600 }}>LIVE</span>
+            </div>
           </div>
-          <div className="flex-1 p-3 overflow-hidden" style={{ background: 'var(--color-bg-surface)' }}>
+          <div style={{ flex: 1, padding: 12, overflow: 'hidden', background: '#F8FAFC' }}>
             <AgentRegistry
               agents={registry.agents}
               onRevoke={registry.revokeAgent}
@@ -140,38 +159,41 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Panel 2: Live Feed */}
-        <div className="flex flex-col min-h-96 md:min-h-0 md:overflow-hidden border-b md:border-b-0 md:border-r"
-          style={{ borderColor: 'var(--color-border)' }}>
-          <div className="px-4 py-2.5 flex items-center justify-between flex-shrink-0"
-            style={{ background: 'var(--color-bg-sunken)', borderBottom: '1px solid var(--color-border)' }}>
-            <div>
-              <h2 className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-medium)' }}>Live Feed</h2>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-low)' }}>Real-time events</p>
+        {/* Panel 2 — Live Feed */}
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: 400, borderRight: '1px solid #E2E8F0' }}>
+          <div style={{ padding: '14px 16px', background: '#fff', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 6, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>⚡</div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 13, color: '#0F172A' }}>Live Feed</div>
+                <div style={{ fontSize: 11, color: '#64748B', marginTop: 1 }}>Real-time authorization events</div>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-success)' }} />
-              <span className="text-xs" style={{ color: 'var(--color-text-subtle)' }}>SSE</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 999, padding: '3px 8px' }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#3B82F6', display: 'inline-block' }} className="animate-pulse" />
+              <span style={{ fontSize: 11, color: '#1D4ED8', fontWeight: 600 }}>SSE</span>
             </div>
           </div>
-          <div className="flex-1 p-3 overflow-hidden" style={{ background: 'var(--color-bg-surface)' }}>
+          <div style={{ flex: 1, padding: 12, overflow: 'hidden', background: '#F8FAFC' }}>
             <LiveFeed events={events} isLoggedIn={!!userName} />
           </div>
         </div>
 
-        {/* Panel 3: Audit Trail */}
-        <div className="flex flex-col min-h-96 md:min-h-0 md:overflow-hidden">
-          <div className="px-4 py-2.5 flex items-center justify-between flex-shrink-0"
-            style={{ background: 'var(--color-bg-sunken)', borderBottom: '1px solid var(--color-border)' }}>
-            <div>
-              <h2 className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-medium)' }}>Audit Trail</h2>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-low)' }}>
-                {audit.entries.length} entries · SHA-256 chain
-              </p>
+        {/* Panel 3 — Audit Trail */}
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: 400, borderLeft: '1px solid #E2E8F0' }}>
+          <div style={{ padding: '14px 16px', background: '#fff', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 6, background: '#F5F3FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>🔗</div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 13, color: '#0F172A' }}>Audit Trail</div>
+                <div style={{ fontSize: 11, color: '#64748B', marginTop: 1 }}>{audit.entries.length} entries · SHA-256 chain</div>
+              </div>
             </div>
-            <span className="text-xs font-medium" style={{ color: 'var(--color-brand)' }}>tamper-evident</span>
+            <div style={{ background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 999, padding: '3px 8px' }}>
+              <span style={{ fontSize: 11, color: '#7C3AED', fontWeight: 600 }}>tamper-evident</span>
+            </div>
           </div>
-          <div className="flex-1 p-3 overflow-hidden" style={{ background: 'var(--color-bg-surface)' }}>
+          <div style={{ flex: 1, padding: 12, overflow: 'hidden', background: '#F8FAFC' }}>
             <AuditTrail
               entries={audit.entries}
               onExport={audit.exportAudit}
@@ -181,11 +203,10 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Status bar */}
-      <div className="px-4 py-1.5 hidden sm:flex items-center gap-4 text-xs flex-shrink-0"
-        style={{ background: 'var(--color-bg-sunken)', borderTop: '1px solid var(--color-border)', color: 'var(--color-text-subtle)' }}>
-        <span>AgentGate v0.1 · Auth0 Token Vault · OPA Policy Engine · CIBA Consent</span>
-        <span className="ml-auto">Authorized to Act: Auth0 for AI Agents Hackathon</span>
+      {/* ── Status bar ───────────────────────────────────────────── */}
+      <div style={{ background: '#F1F5F9', borderTop: '1px solid #E2E8F0', padding: '8px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <span style={{ fontSize: 11, color: '#64748B' }}>AgentGate v0.1 · Auth0 Token Vault · OPA Policy Engine · CIBA Consent</span>
+        <span style={{ fontSize: 11, color: '#64748B' }}>Authorized to Act: Auth0 for AI Agents Hackathon</span>
       </div>
     </div>
   );

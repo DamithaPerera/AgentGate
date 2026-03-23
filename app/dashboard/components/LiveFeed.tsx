@@ -14,24 +14,26 @@ interface FeedEntry {
 
 interface Props { events: AgentEvent[]; isLoggedIn?: boolean; }
 
-function DecisionBadge({ decision }: { decision?: string }) {
-  if (!decision) return null;
-  const map: Record<string, { bg: string; color: string }> = {
-    ALLOWED:      { bg: 'var(--color-success-bg)',  color: 'var(--color-success-text)' },
-    APPROVED_CIBA:{ bg: 'var(--color-success-bg)',  color: 'var(--color-success-text)' },
-    DENIED:       { bg: 'var(--color-danger-bg)',   color: 'var(--color-danger-text)' },
-    ESCALATED:    { bg: 'var(--color-warning-bg)',  color: 'var(--color-warning-text)' },
-    REVOKED:      { bg: 'var(--color-danger-bg)',   color: 'var(--color-danger-text)' },
-  };
-  const icons: Record<string, string> = { ALLOWED:'✓', APPROVED_CIBA:'✓', DENIED:'✗', ESCALATED:'⚠', REVOKED:'⚡' };
-  const s = map[decision] ?? { bg: 'var(--color-bg-sunken)', color: 'var(--color-text-medium)' };
-  return (
-    <span className="text-xs px-2 py-0.5 rounded font-semibold flex-shrink-0"
-      style={{ background: s.bg, color: s.color }}>
-      {icons[decision] ?? '·'} {decision}
-    </span>
-  );
-}
+const DECISION_STYLES: Record<string, { bg: string; color: string; icon: string }> = {
+  ALLOWED:       { bg: '#F0FDF4', color: '#16A34A', icon: '✓' },
+  APPROVED_CIBA: { bg: '#F0FDF4', color: '#16A34A', icon: '✓' },
+  DENIED:        { bg: '#FFF1F2', color: '#DC2626', icon: '✗' },
+  ESCALATED:     { bg: '#FFFBEB', color: '#D97706', icon: '⚠' },
+  REVOKED:       { bg: '#FFF1F2', color: '#DC2626', icon: '⚡' },
+};
+
+const TYPE_LABELS: Record<string, { label: string; bg: string; color: string }> = {
+  agent_registered: { label: '🤖 Registered',     bg: '#EFF6FF', color: '#1D4ED8' },
+  agent_revoked:    { label: '⚡ Revoked',         bg: '#FFF1F2', color: '#DC2626' },
+  auth_request:     { label: '🔒 Auth Request',    bg: '#F8FAFC', color: '#374151' },
+  ciba_approved:    { label: '✓ CIBA Approved',    bg: '#F0FDF4', color: '#16A34A' },
+  ciba_denied:      { label: '✗ CIBA Denied',      bg: '#FFF1F2', color: '#DC2626' },
+  ciba_expired:     { label: '⏱ CIBA Expired',    bg: '#FFFBEB', color: '#D97706' },
+  token_issued:     { label: '🎫 Token Issued',    bg: '#F0FDF4', color: '#15803D' },
+  revocation:       { label: '⚡ Revocation',       bg: '#FFF1F2', color: '#DC2626' },
+  panic_revocation: { label: '🚨 PANIC',            bg: '#FFF1F2', color: '#991B1B' },
+  audit_entry:      { label: '📋 Audit',            bg: '#F5F3FF', color: '#7C3AED' },
+};
 
 export function LiveFeed({ events, isLoggedIn }: Props) {
   const [cibaRequests, setCibaRequests] = useState<Record<string, CIBARequest>>({});
@@ -69,61 +71,50 @@ export function LiveFeed({ events, isLoggedIn }: Props) {
   const totalPages = Math.max(1, Math.ceil(feedEntries.length / PAGE_SIZE));
   const pagedEntries = feedEntries.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const typeLabel: Record<string, string> = {
-    agent_registered: '🤖 Registered',  agent_revoked: '⚡ Revoked',
-    auth_request: '🔒 Auth',            ciba_approved: '✓ CIBA Approved',
-    ciba_denied: '✗ CIBA Denied',       ciba_expired: '⏱ CIBA Expired',
-    token_issued: '🎫 Token',           revocation: '⚡ Revocation',
-    panic_revocation: '🚨 PANIC',       audit_entry: '📋 Audit',
-  };
-
   return (
-    <div className="flex flex-col h-full gap-2 overflow-y-auto min-h-0">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 6 }}>
       {Object.values(cibaRequests).map(req => (
         <CIBACard key={req.requestId} request={req} onRespond={handleCibaRespond} />
       ))}
 
-      {feedEntries.length === 0 && Object.keys(cibaRequests).length === 0 ? (
-        <div className="text-xs text-center py-8" style={{ color: 'var(--color-text-subtle)' }}>
-          Waiting for events…
-          {!isLoggedIn && <><br /><span>Click ▶ Run Demo to start</span></>}
-        </div>
-      ) : (
-        pagedEntries.map(entry => (
-          <div key={entry.id} className="feed-entry rounded p-3 border"
-            style={{ background: 'var(--color-bg-page)', borderColor: 'var(--color-border)' }}>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-mono" style={{ color: 'var(--color-text-subtle)' }}>
-                    {new Date(entry.timestamp).toLocaleTimeString()}
-                  </span>
-                  <span className="text-xs" style={{ color: 'var(--color-text-medium)' }}>
-                    {typeLabel[entry.type] ?? entry.type}
-                  </span>
+      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 5, minHeight: 0 }}>
+        {feedEntries.length === 0 && Object.keys(cibaRequests).length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '32px 16px', color: '#475569', fontSize: 13 }}>
+            Waiting for events…
+            {!isLoggedIn && <><br /><span style={{ fontSize: 12 }}>Click ▶ Run Demo to start</span></>}
+          </div>
+        ) : pagedEntries.map(entry => {
+          const typeInfo = TYPE_LABELS[entry.type] ?? { label: entry.type, bg: '#F8FAFC', color: '#374151' };
+          const decisionStyle = entry.decision ? DECISION_STYLES[entry.decision] : null;
+          return (
+            <div key={entry.id} className="feed-entry" style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 12px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 999, background: typeInfo.bg, color: typeInfo.color, fontWeight: 600, flexShrink: 0 }}>{typeInfo.label}</span>
+                    <span style={{ fontSize: 10, color: '#94A3B8', fontFamily: 'monospace' }}>{new Date(entry.timestamp).toLocaleTimeString()}</span>
+                  </div>
+                  {entry.agentName && (
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#0F172A', marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.agentName}</div>
+                  )}
+                  {entry.action && (
+                    <div style={{ fontSize: 11, color: '#64748B', fontFamily: 'monospace', marginBottom: 2 }}>{entry.action}</div>
+                  )}
+                  {entry.tokenTTL && (
+                    <div style={{ fontSize: 11, color: '#16A34A', fontWeight: 600 }}>TTL: {entry.tokenTTL}s</div>
+                  )}
                 </div>
-                {entry.agentName && (
-                  <div className="text-sm mt-1 font-medium truncate" style={{ color: 'var(--color-text-high)' }}>
-                    {entry.agentName}
-                  </div>
-                )}
-                {entry.action && (
-                  <div className="text-xs font-mono mt-0.5" style={{ color: 'var(--color-text-medium)' }}>{entry.action}</div>
-                )}
-                {entry.reason && entry.type !== 'audit_entry' && (
-                  <div className="text-xs mt-1 truncate" style={{ color: 'var(--color-text-low)' }}>{entry.reason}</div>
-                )}
-                {entry.tokenTTL && (
-                  <div className="text-xs mt-0.5 font-medium" style={{ color: 'var(--color-success-text)' }}>
-                    Token TTL: {entry.tokenTTL}s
-                  </div>
+                {decisionStyle && (
+                  <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: decisionStyle.bg, color: decisionStyle.color, flexShrink: 0 }}>
+                    {decisionStyle.icon} {entry.decision}
+                  </span>
                 )}
               </div>
-              <DecisionBadge decision={entry.decision} />
             </div>
-          </div>
-        ))
-      )}
+          );
+        })}
+      </div>
+
       <Pagination page={page} totalPages={totalPages} onPage={setPage} />
     </div>
   );
