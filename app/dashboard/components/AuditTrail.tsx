@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import type { AuditEntry } from '@/lib/types';
 import { Pagination } from './Pagination';
+import { Badge, StatusDot, FilterInput, EmptyState, StatusBanner } from './ui';
 
 const PAGE_SIZE = 5;
 
@@ -44,81 +45,83 @@ export function AuditTrail({ entries, onExport, onVerify }: Props) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 8 }}>
+    <div className="flex flex-col h-full gap-2">
       {/* Toolbar */}
-      <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-        <input type="text" placeholder="Filter entries…" value={filter}
-          onChange={e => { setFilter(e.target.value); setPage(1); }}
-          style={{ flex: 1, borderRadius: 8, padding: '7px 12px', fontSize: 12, border: '1px solid #E2E8F0', background: '#fff', color: '#0F172A', outline: 'none', minWidth: 0 }} />
+      <div className="flex gap-1.5 shrink-0">
+        <FilterInput
+          value={filter}
+          onChange={v => { setFilter(v); setPage(1); }}
+          placeholder="Filter entries…"
+        />
         <button onClick={handleVerify}
-          style={{ padding: '7px 12px', borderRadius: 8, border: '1px solid #E2E8F0', background: '#fff', color: '#374151', fontSize: 12, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+          className="px-3 py-[7px] rounded-lg border border-[#E2E8F0] bg-white text-[#374151] text-xs font-medium cursor-pointer whitespace-nowrap">
           Verify
         </button>
         <button onClick={onExport}
-          style={{ padding: '7px 12px', borderRadius: 8, border: '1px solid #E2E8F0', background: '#fff', color: '#374151', fontSize: 12, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+          className="px-3 py-[7px] rounded-lg border border-[#E2E8F0] bg-white text-[#374151] text-xs font-medium cursor-pointer whitespace-nowrap">
           Export
         </button>
       </div>
 
       {verifyResult && (
-        <div style={{ fontSize: 12, padding: '7px 12px', borderRadius: 8, fontWeight: 600, background: verifyResult.valid ? '#F0FDF4' : '#FFF1F2', color: verifyResult.valid ? '#16A34A' : '#DC2626', border: `1px solid ${verifyResult.valid ? '#BBF7D0' : '#FECDD3'}`, flexShrink: 0 }}>
-          {verifyResult.valid ? '✓' : '✗'} {verifyResult.message}
-        </div>
+        <StatusBanner type={verifyResult.valid ? 'success' : 'error'} text={verifyResult.message} />
       )}
 
       {/* Entries */}
-      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 5, minHeight: 0 }}>
+      <div className="flex-1 overflow-y-auto flex flex-col gap-[5px] min-h-0">
         {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px 16px', color: '#94A3B8', fontSize: 13 }}>
-            {filter ? 'No matching entries' : 'No audit entries yet'}
-          </div>
+          <EmptyState
+            message={filter ? 'No matching entries' : 'No audit entries yet'}
+          />
         ) : pagedEntries.map(entry => {
           const ds = DECISION_STYLES[entry.decision] ?? { bg: '#F8FAFC', color: '#64748B', dot: '#94A3B8' };
           const isOpen = expanded === entry.id;
           return (
-            <div key={entry.id} style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 10, overflow: 'hidden' }}>
-              <button style={{ width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+            <div key={entry.id} className="bg-white border border-[#E2E8F0] rounded-[10px] overflow-hidden">
+              <button className="w-full text-left px-3 py-2.5 bg-transparent border-none cursor-pointer"
                 onClick={() => setExpanded(isOpen ? null : entry.id)}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 10, fontFamily: 'monospace', color: '#94A3B8', flexShrink: 0, minWidth: 24 }}>#{entry.sequenceNumber}</span>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: ds.dot, display: 'inline-block', flexShrink: 0 }} />
-                  <span style={{ fontSize: 10, fontFamily: 'monospace', color: '#94A3B8', flexShrink: 0 }}>{new Date(entry.timestamp).toLocaleTimeString()}</span>
-                  <span style={{ fontSize: 12, fontWeight: 500, color: '#374151', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.type}</span>
-                  <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: ds.bg, color: ds.color, flexShrink: 0 }}>{entry.decision}</span>
-                  <span style={{ fontSize: 10, color: '#94A3B8' }}>{isOpen ? '▲' : '▼'}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono text-[#94A3B8] shrink-0 min-w-[24px]">#{entry.sequenceNumber}</span>
+                  <StatusDot color={ds.dot} />
+                  <span className="text-[10px] font-mono text-[#94A3B8] shrink-0">{new Date(entry.timestamp).toLocaleTimeString()}</span>
+                  <span className="text-xs font-medium text-[#374151] flex-1 truncate">{entry.type}</span>
+                  <Badge style={{ background: ds.bg, color: ds.color }} className="font-bold px-2 py-0.5">
+                    {entry.decision}
+                  </Badge>
+                  <span className="text-[10px] text-[#94A3B8]">{isOpen ? '▲' : '▼'}</span>
                 </div>
-                <div style={{ display: 'flex', gap: 6, marginTop: 4, marginLeft: 32 }}>
-                  <span style={{ fontSize: 10, fontFamily: 'monospace', color: '#64748B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.action}</span>
-                  {entry.resource && <span style={{ fontSize: 10, color: '#CBD5E1' }}>→ {entry.resource}</span>}
+                <div className="flex gap-1.5 mt-1 ml-8">
+                  <span className="text-[10px] font-mono text-[#64748B] truncate">{entry.action}</span>
+                  {entry.resource && <span className="text-[10px] text-[#CBD5E1]">→ {entry.resource}</span>}
                 </div>
               </button>
 
               {isOpen && (
-                <div style={{ padding: '10px 12px', borderTop: '1px solid #F1F5F9', background: '#F8FAFC' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 16px', marginBottom: 8 }}>
+                <div className="px-3 py-2.5 border-t border-[#F1F5F9] bg-[#F8FAFC]">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-2">
                     {[
                       ['Agent', entry.agentId],
                       ['Policy', entry.policyId ?? '—'],
                       ['User', entry.userId],
                       ...(entry.tokenTTL ? [['TTL', `${entry.tokenTTL}s`]] : []),
                     ].map(([label, val]) => (
-                      <div key={label} style={{ fontSize: 11 }}>
-                        <span style={{ color: '#94A3B8' }}>{label}: </span>
-                        <span style={{ color: '#0F172A', fontFamily: 'monospace' }}>{val}</span>
+                      <div key={label} className="text-[11px]">
+                        <span className="text-[#94A3B8]">{label}: </span>
+                        <span className="text-[#0F172A] font-mono">{val}</span>
                       </div>
                     ))}
                   </div>
-                  <div style={{ fontSize: 12, color: '#64748B', fontStyle: 'italic', marginBottom: 8 }}>{entry.reason}</div>
+                  <div className="text-xs text-[#64748B] italic mb-2">{entry.reason}</div>
                   {entry.tokenScopes && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
+                    <div className="flex flex-wrap gap-1 mb-2">
                       {entry.tokenScopes.map(s => (
-                        <span key={s} style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#EFF6FF', color: '#1D4ED8', fontFamily: 'monospace', border: '1px solid #BFDBFE' }}>{s}</span>
+                        <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-[#EFF6FF] text-[#1D4ED8] font-mono border border-[#BFDBFE]">{s}</span>
                       ))}
                     </div>
                   )}
-                  <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: 6 }}>
-                    <div style={{ fontSize: 10, fontFamily: 'monospace', color: '#94A3B8', wordBreak: 'break-all' }}>hash: {entry.hash.substring(0, 20)}…</div>
-                    <div style={{ fontSize: 10, fontFamily: 'monospace', color: '#CBD5E1', wordBreak: 'break-all' }}>prev: {entry.previousHash.substring(0, 20)}…</div>
+                  <div className="border-t border-[#E2E8F0] pt-1.5">
+                    <div className="text-[10px] font-mono text-[#94A3B8] break-all">hash: {entry.hash.substring(0, 20)}…</div>
+                    <div className="text-[10px] font-mono text-[#CBD5E1] break-all">prev: {entry.previousHash.substring(0, 20)}…</div>
                   </div>
                 </div>
               )}

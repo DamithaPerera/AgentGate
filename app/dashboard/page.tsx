@@ -10,6 +10,7 @@ import { useAgentEvents } from './hooks/useAgentEvents';
 import { useAgentRegistry } from './hooks/useAgentRegistry';
 import { useAuditTrail } from './hooks/useAuditTrail';
 import type { AgentEvent, PolicyRule } from '@/lib/types';
+import { IconBox, SectionHeader, StatusDot, LivePill } from './components/ui';
 
 export default function DashboardPage() {
   const [events, setEvents] = useState<AgentEvent[]>([]);
@@ -67,52 +68,57 @@ export default function DashboardPage() {
   const activeCount = registry.agents.filter(a => a.status === 'active').length;
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F8FAFC', fontFamily: 'Inter, -apple-system, sans-serif' }}>
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] font-sans">
 
       {/* ── Header ──────────────────────────────────────────────── */}
-      <header style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', flexShrink: 0, zIndex: 50, borderBottom: '1px solid #E2E8F0' }}>
-        <div style={{ maxWidth: '100%', padding: '0 20px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <header className="bg-white/95 backdrop-blur-md shrink-0 z-50 border-b border-[#E2E8F0]">
+        <div className="w-full px-5 h-14 flex items-center justify-between gap-3">
           {/* Left */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, #3B82F6, #0052CC)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 12 }}>AG</div>
-              <span style={{ fontWeight: 700, fontSize: 15, color: '#0F172A' }}>AgentGate</span>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2 no-underline">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#3B82F6] to-[#0052CC] flex items-center justify-center text-white font-extrabold text-xs">AG</div>
+              <span className="font-bold text-[15px] text-[#0F172A]">AgentGate</span>
             </Link>
-            <div style={{ width: 1, height: 20, background: '#E2E8F0' }} />
-            <span style={{ fontSize: 13, color: '#64748B', fontWeight: 500 }}>Security Dashboard</span>
+            <div className="w-px h-5 bg-[#E2E8F0]" />
+            <span className="text-[13px] text-[#64748B] font-medium">Security Dashboard</span>
           </div>
 
           {/* Center — status badges */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, justifyContent: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 999, padding: '4px 10px' }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16A34A', display: 'inline-block' }} className="animate-pulse" />
-              <span style={{ fontSize: 12, color: '#15803D', fontWeight: 500 }}>{activeCount} active</span>
+          <div className="flex items-center gap-2 flex-1 justify-center">
+            <div className="flex items-center gap-1.5 bg-[#F0FDF4] border border-[#BBF7D0] rounded-full px-2.5 py-1">
+              <StatusDot color="#16A34A" pulse size="sm" />
+              <span className="text-xs text-[#15803D] font-medium">{activeCount} active</span>
             </div>
             {demoMessage && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 999, padding: '4px 10px' }}>
-                <span style={{ fontSize: 12, color: '#1D4ED8', fontWeight: 500 }}>{demoMessage}</span>
+              <div className="flex items-center gap-1.5 bg-[#EFF6FF] border border-[#BFDBFE] rounded-full px-2.5 py-1">
+                <span className="text-xs text-[#1D4ED8] font-medium">{demoMessage}</span>
               </div>
             )}
           </div>
 
           {/* Right */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="flex items-center gap-2">
             {!userName && (
               <button onClick={runDemo} disabled={demoRunning}
-                style={{ padding: '6px 14px', borderRadius: 8, background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE', fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: demoRunning ? 0.5 : 1 }}>
+                className="px-3.5 py-1.5 rounded-lg bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE] text-[13px] font-semibold cursor-pointer"
+                style={{ opacity: demoRunning ? 0.5 : 1 }}>
                 {demoRunning ? '⟳ Running...' : '▶ Run Demo'}
               </button>
             )}
             {userName && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8, padding: '5px 12px' }}>
-                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #3B82F6, #0052CC)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff' }}>
+              <div className="flex items-center gap-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-3 py-[5px]">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#0052CC] flex items-center justify-center text-[10px] font-bold text-white">
                   {userName.charAt(0).toUpperCase()}
                 </div>
-                <span style={{ fontSize: 13, color: '#374151', fontWeight: 500, maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{userName}</span>
+                <span className="text-[13px] text-[#374151] font-medium max-w-[120px] truncate">{userName}</span>
               </div>
             )}
             <Link href={userName ? '/auth/logout' : '/auth/login?returnTo=/dashboard'}
-              style={{ padding: '6px 14px', borderRadius: 8, background: userName ? '#FFF1F2' : 'linear-gradient(135deg, #0052CC, #0065FF)', color: userName ? '#DC2626' : '#fff', border: userName ? '1px solid #FECDD3' : 'none', fontSize: 13, fontWeight: 600, textDecoration: 'none', boxShadow: userName ? 'none' : '0 2px 8px rgba(0,82,204,0.3)' }}>
+              className="px-3.5 py-1.5 rounded-lg text-[13px] font-semibold no-underline"
+              style={userName
+                ? { background: '#FFF1F2', color: '#DC2626', border: '1px solid #FECDD3' }
+                : { background: 'linear-gradient(135deg, #0052CC, #0065FF)', color: '#fff', border: 'none', boxShadow: '0 2px 8px rgba(0,82,204,0.3)' }
+              }>
               {userName ? 'Log out' : 'Log in'}
             </Link>
           </div>
@@ -120,35 +126,37 @@ export default function DashboardPage() {
       </header>
 
       {/* ── Policy Engine bar ────────────────────────────────────── */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', padding: '16px 20px', flexShrink: 0 }}>
-        <div style={{ maxWidth: '100%', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 6, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>⚖️</div>
-          <span style={{ fontWeight: 700, fontSize: 13, color: '#0F172A' }}>Policy Engine</span>
-          <span style={{ fontSize: 12, color: '#64748B', background: '#F1F5F9', padding: '2px 8px', borderRadius: 999, border: '1px solid #E2E8F0' }}>{rules.length} rules active</span>
+      <div className="bg-white border-b border-[#E2E8F0] px-5 py-4 shrink-0">
+        <div className="w-full flex items-center gap-2.5 mb-2.5">
+          <IconBox icon="⚖️" bgClass="bg-[#EFF6FF]" />
+          <span className="font-bold text-[13px] text-[#0F172A]">Policy Engine</span>
+          <span className="text-xs text-[#64748B] bg-[#F1F5F9] px-2 py-0.5 rounded-full border border-[#E2E8F0]">{rules.length} rules active</span>
         </div>
         <PolicyEditor rules={rules} onRulesChange={setRules} />
       </div>
 
       {/* ── 3-Panel Grid ─────────────────────────────────────────── */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', minHeight: 0, overflow: 'auto' }}
-        className="md:overflow-hidden md:grid-cols-3">
+      <div className="flex-1 grid overflow-auto md:overflow-hidden md:grid-cols-3"
+        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', minHeight: 0 }}>
 
         {/* Panel 1 — Agent Registry */}
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: 400, borderRight: '1px solid #E2E8F0' }}>
-          <div style={{ padding: '14px 16px', background: '#fff', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 6, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>🤖</div>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 13, color: '#0F172A' }}>Agent Registry</div>
-                <div style={{ fontSize: 11, color: '#64748B', marginTop: 1 }}>{activeCount} of {registry.agents.length} active</div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 999, padding: '3px 8px' }}>
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#16A34A', display: 'inline-block' }} className="animate-pulse" />
-              <span style={{ fontSize: 11, color: '#16A34A', fontWeight: 600 }}>LIVE</span>
-            </div>
-          </div>
-          <div style={{ flex: 1, padding: 12, overflow: 'hidden', background: '#F8FAFC' }}>
+        <div className="flex flex-col min-h-[400px] border-r border-[#E2E8F0]">
+          <SectionHeader
+            icon="🤖"
+            iconBgClass="bg-[#EFF6FF]"
+            title="Agent Registry"
+            subtitle={`${activeCount} of ${registry.agents.length} active`}
+            right={
+              <LivePill
+                dotColor="#16A34A"
+                textColor="text-[#16A34A]"
+                bgClass="bg-[#F0FDF4]"
+                borderClass="border-[#BBF7D0]"
+                label="LIVE"
+              />
+            }
+          />
+          <div className="flex-1 p-3 overflow-hidden bg-[#F8FAFC]">
             <AgentRegistry
               agents={registry.agents}
               onRevoke={registry.revokeAgent}
@@ -160,40 +168,45 @@ export default function DashboardPage() {
         </div>
 
         {/* Panel 2 — Live Feed */}
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: 400, borderRight: '1px solid #E2E8F0' }}>
-          <div style={{ padding: '14px 16px', background: '#fff', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 6, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>⚡</div>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 13, color: '#0F172A' }}>Live Feed</div>
-                <div style={{ fontSize: 11, color: '#64748B', marginTop: 1 }}>Real-time authorization events</div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 999, padding: '3px 8px' }}>
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#3B82F6', display: 'inline-block' }} className="animate-pulse" />
-              <span style={{ fontSize: 11, color: '#1D4ED8', fontWeight: 600 }}>SSE</span>
-            </div>
-          </div>
-          <div style={{ flex: 1, padding: 12, overflow: 'hidden', background: '#F8FAFC' }}>
+        <div className="flex flex-col min-h-[400px] border-r border-[#E2E8F0]">
+          <SectionHeader
+            icon="⚡"
+            iconBgClass="bg-[#F0FDF4]"
+            title="Live Feed"
+            subtitle="Real-time authorization events"
+            right={
+              <LivePill
+                dotColor="#3B82F6"
+                textColor="text-[#1D4ED8]"
+                bgClass="bg-[#EFF6FF]"
+                borderClass="border-[#BFDBFE]"
+                label="SSE"
+              />
+            }
+          />
+          <div className="flex-1 p-3 overflow-hidden bg-[#F8FAFC]">
             <LiveFeed events={events} isLoggedIn={!!userName} />
           </div>
         </div>
 
         {/* Panel 3 — Audit Trail */}
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: 400, borderLeft: '1px solid #E2E8F0' }}>
-          <div style={{ padding: '14px 16px', background: '#fff', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 6, background: '#F5F3FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>🔗</div>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 13, color: '#0F172A' }}>Audit Trail</div>
-                <div style={{ fontSize: 11, color: '#64748B', marginTop: 1 }}>{audit.entries.length} entries · SHA-256 chain</div>
-              </div>
-            </div>
-            <div style={{ background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 999, padding: '3px 8px' }}>
-              <span style={{ fontSize: 11, color: '#7C3AED', fontWeight: 600 }}>tamper-evident</span>
-            </div>
-          </div>
-          <div style={{ flex: 1, padding: 12, overflow: 'hidden', background: '#F8FAFC' }}>
+        <div className="flex flex-col min-h-[400px] border-l border-[#E2E8F0]">
+          <SectionHeader
+            icon="🔗"
+            iconBgClass="bg-[#F5F3FF]"
+            title="Audit Trail"
+            subtitle={`${audit.entries.length} entries · SHA-256 chain`}
+            right={
+              <LivePill
+                textColor="text-[#7C3AED]"
+                bgClass="bg-[#F5F3FF]"
+                borderClass="border-[#DDD6FE]"
+                label="tamper-evident"
+                showDot={false}
+              />
+            }
+          />
+          <div className="flex-1 p-3 overflow-hidden bg-[#F8FAFC]">
             <AuditTrail
               entries={audit.entries}
               onExport={audit.exportAudit}
@@ -204,9 +217,9 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Status bar ───────────────────────────────────────────── */}
-      <div style={{ background: '#F1F5F9', borderTop: '1px solid #E2E8F0', padding: '8px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-        <span style={{ fontSize: 11, color: '#64748B' }}>AgentGate v0.1 · Auth0 Token Vault · OPA Policy Engine · CIBA Consent</span>
-        <span style={{ fontSize: 11, color: '#64748B' }}>Authorized to Act: Auth0 for AI Agents Hackathon</span>
+      <div className="bg-[#F1F5F9] border-t border-[#E2E8F0] px-5 py-2 flex items-center justify-between shrink-0">
+        <span className="text-[11px] text-[#64748B]">AgentGate v0.1 · Auth0 Token Vault · OPA Policy Engine · CIBA Consent</span>
+        <span className="text-[11px] text-[#64748B]">Authorized to Act: Auth0 for AI Agents Hackathon</span>
       </div>
     </div>
   );

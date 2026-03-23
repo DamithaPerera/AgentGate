@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import type { AgentEvent } from '@/lib/types';
 import { CIBACard, type CIBARequest } from './CIBACard';
 import { Pagination } from './Pagination';
+import { Badge, EmptyState } from './ui';
 
 const PAGE_SIZE = 5;
 
@@ -72,42 +73,44 @@ export function LiveFeed({ events, isLoggedIn }: Props) {
   const pagedEntries = feedEntries.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 6 }}>
+    <div className="flex flex-col h-full gap-1.5">
       {Object.values(cibaRequests).map(req => (
         <CIBACard key={req.requestId} request={req} onRespond={handleCibaRespond} />
       ))}
 
-      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 5, minHeight: 0 }}>
+      <div className="flex-1 overflow-y-auto flex flex-col gap-[5px] min-h-0">
         {feedEntries.length === 0 && Object.keys(cibaRequests).length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px 16px', color: '#475569', fontSize: 13 }}>
-            Waiting for events…
-            {!isLoggedIn && <><br /><span style={{ fontSize: 12 }}>Click ▶ Run Demo to start</span></>}
-          </div>
+          <EmptyState
+            message="Waiting for events…"
+            hint={!isLoggedIn ? 'Click ▶ Run Demo to start' : undefined}
+          />
         ) : pagedEntries.map(entry => {
           const typeInfo = TYPE_LABELS[entry.type] ?? { label: entry.type, bg: '#F8FAFC', color: '#374151' };
           const decisionStyle = entry.decision ? DECISION_STYLES[entry.decision] : null;
           return (
-            <div key={entry.id} className="feed-entry" style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 12px' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                    <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 999, background: typeInfo.bg, color: typeInfo.color, fontWeight: 600, flexShrink: 0 }}>{typeInfo.label}</span>
-                    <span style={{ fontSize: 10, color: '#94A3B8', fontFamily: 'monospace' }}>{new Date(entry.timestamp).toLocaleTimeString()}</span>
+            <div key={entry.id} className="feed-entry bg-white border border-[#E2E8F0] rounded-[10px] px-3 py-2.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Badge style={{ background: typeInfo.bg, color: typeInfo.color }}>
+                      {typeInfo.label}
+                    </Badge>
+                    <span className="text-[10px] text-[#94A3B8] font-mono">{new Date(entry.timestamp).toLocaleTimeString()}</span>
                   </div>
                   {entry.agentName && (
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#0F172A', marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.agentName}</div>
+                    <div className="text-xs font-semibold text-[#0F172A] mb-0.5 truncate">{entry.agentName}</div>
                   )}
                   {entry.action && (
-                    <div style={{ fontSize: 11, color: '#64748B', fontFamily: 'monospace', marginBottom: 2 }}>{entry.action}</div>
+                    <div className="text-[11px] text-[#64748B] font-mono mb-0.5">{entry.action}</div>
                   )}
                   {entry.tokenTTL && (
-                    <div style={{ fontSize: 11, color: '#16A34A', fontWeight: 600 }}>TTL: {entry.tokenTTL}s</div>
+                    <div className="text-[11px] text-[#16A34A] font-semibold">TTL: {entry.tokenTTL}s</div>
                   )}
                 </div>
                 {decisionStyle && (
-                  <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: decisionStyle.bg, color: decisionStyle.color, flexShrink: 0 }}>
+                  <Badge style={{ background: decisionStyle.bg, color: decisionStyle.color }} className="font-bold px-2 py-[3px]">
                     {decisionStyle.icon} {entry.decision}
-                  </span>
+                  </Badge>
                 )}
               </div>
             </div>

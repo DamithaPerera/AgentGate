@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import type { PolicyRule } from '@/lib/types';
+import { Badge, Toggle, StatusBanner } from './ui';
 
 interface Props { rules: PolicyRule[]; onRulesChange: (rules: PolicyRule[]) => void; }
 
@@ -51,50 +52,46 @@ export function PolicyEditor({ rules, onRulesChange }: Props) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div className="flex flex-col gap-2.5">
       {/* Input row */}
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div className="flex gap-2">
         <input type="text"
           placeholder='e.g. "Agents can read Gmail but cannot send to external addresses"'
           value={text}
           onChange={e => setText(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleCompile()}
-          style={{ flex: 1, borderRadius: 8, padding: '8px 14px', fontSize: 13, border: '1px solid #E2E8F0', background: '#fff', color: '#0F172A', outline: 'none', minWidth: 0 }} />
+          className="flex-1 rounded-lg px-3.5 py-2 text-[13px] border border-[#E2E8F0] bg-white text-[#0F172A] outline-none min-w-0" />
         <button onClick={handleCompile} disabled={compiling || !text.trim()}
-          style={{ padding: '8px 18px', borderRadius: 8, background: 'linear-gradient(135deg, #0052CC, #0065FF)', color: '#fff', fontWeight: 600, fontSize: 13, border: 'none', cursor: 'pointer', opacity: (compiling || !text.trim()) ? 0.5 : 1, whiteSpace: 'nowrap', boxShadow: '0 2px 8px rgba(0,82,204,0.3)' }}>
+          className="px-[18px] py-2 rounded-lg text-white font-semibold text-[13px] border-none cursor-pointer whitespace-nowrap"
+          style={{
+            background: 'linear-gradient(135deg, #0052CC, #0065FF)',
+            opacity: (compiling || !text.trim()) ? 0.5 : 1,
+            boxShadow: '0 2px 8px rgba(0,82,204,0.3)',
+          }}>
           {compiling ? '…' : 'Apply'}
         </button>
       </div>
 
       {message && (
-        <div style={{ fontSize: 12, padding: '6px 12px', borderRadius: 6, fontWeight: 500, background: message.type === 'success' ? '#F0FDF4' : '#FFF1F2', color: message.type === 'success' ? '#16A34A' : '#DC2626', border: `1px solid ${message.type === 'success' ? '#BBF7D0' : '#FECDD3'}` }}>
-          {message.type === 'success' ? '✓' : '✗'} {message.text}
-        </div>
+        <StatusBanner type={message.type} text={message.text} className="py-1.5 rounded-md" />
       )}
 
       {/* Rules list */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 160, overflowY: 'auto' }}>
+      <div className="flex flex-col gap-1 max-h-40 overflow-y-auto">
         {rules.map(rule => {
           const dc = decisionColors[rule.decision] ?? { color: '#64748B', bg: '#F8FAFC' };
           return (
-            <div key={rule.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 8, background: rule.enabled ? '#fff' : '#F8FAFC', border: '1px solid #E2E8F0', opacity: rule.enabled ? 1 : 0.55, transition: 'opacity 0.2s' }}>
-              {/* Toggle */}
-              <button onClick={() => toggleRule(rule.id)} style={{
-                position: 'relative', flexShrink: 0, width: '2rem', height: '1rem',
-                borderRadius: 999, border: 'none', cursor: 'pointer',
-                background: rule.enabled ? '#0052CC' : '#334155',
-                transition: 'background 150ms',
+            <div key={rule.id}
+              className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] transition-opacity"
+              style={{
+                background: rule.enabled ? '#fff' : '#F8FAFC',
+                opacity: rule.enabled ? 1 : 0.55,
               }}>
-                <span style={{
-                  position: 'absolute', top: '0.125rem', borderRadius: '50%',
-                  width: '0.75rem', height: '0.75rem', background: '#fff',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                  left: rule.enabled ? '1.125rem' : '0.125rem',
-                  transition: 'left 150ms',
-                }} />
-              </button>
-              <span style={{ flex: 1, fontSize: 12, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rule.name}</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: dc.color, background: dc.bg, padding: '2px 8px', borderRadius: 999, flexShrink: 0 }}>{rule.decision}</span>
+              <Toggle enabled={rule.enabled} onChange={() => toggleRule(rule.id)} />
+              <span className="flex-1 text-xs text-[#374151] truncate">{rule.name}</span>
+              <Badge style={{ color: dc.color, background: dc.bg }} className="font-bold px-2 py-0.5">
+                {rule.decision}
+              </Badge>
             </div>
           );
         })}
