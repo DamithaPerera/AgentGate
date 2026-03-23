@@ -10,6 +10,7 @@ interface Props {
   onRevoke: (id: string) => void;
   onRevokeService: (service: string) => void;
   onPanic: () => void;
+  isLoggedIn?: boolean;
 }
 
 const FRAMEWORK_LABEL: Record<string, string> = {
@@ -34,7 +35,7 @@ function TrustBadge({ level }: { level: number }) {
   );
 }
 
-export function AgentRegistry({ agents, onRevoke, onRevokeService, onPanic }: Props) {
+export function AgentRegistry({ agents, onRevoke, onRevokeService, onPanic, isLoggedIn }: Props) {
   const [panicConfirm, setPanicConfirm] = useState(false);
   const [page, setPage] = useState(1);
   const activeAgents = agents.filter(a => a.status === 'active');
@@ -49,7 +50,8 @@ export function AgentRegistry({ agents, onRevoke, onRevokeService, onPanic }: Pr
       <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
         {agents.length === 0 ? (
           <div className="text-xs text-center py-8" style={{ color: 'var(--color-text-subtle)' }}>
-            No agents registered yet.<br />Click ▶ Run Demo to get started.
+            No agents registered yet.
+            {!isLoggedIn && <><br />Click ▶ Run Demo to get started.</>}
           </div>
         ) : pagedAgents.map(agent => (
           <div key={agent.id} className="rounded p-3 border transition-all"

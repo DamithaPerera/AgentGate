@@ -12,7 +12,7 @@ interface FeedEntry {
   resource?: string; decision?: string; reason?: string; tokenTTL?: number;
 }
 
-interface Props { events: AgentEvent[]; }
+interface Props { events: AgentEvent[]; isLoggedIn?: boolean; }
 
 function DecisionBadge({ decision }: { decision?: string }) {
   if (!decision) return null;
@@ -33,7 +33,7 @@ function DecisionBadge({ decision }: { decision?: string }) {
   );
 }
 
-export function LiveFeed({ events }: Props) {
+export function LiveFeed({ events, isLoggedIn }: Props) {
   const [cibaRequests, setCibaRequests] = useState<Record<string, CIBARequest>>({});
   const [page, setPage] = useState(1);
 
@@ -85,7 +85,8 @@ export function LiveFeed({ events }: Props) {
 
       {feedEntries.length === 0 && Object.keys(cibaRequests).length === 0 ? (
         <div className="text-xs text-center py-8" style={{ color: 'var(--color-text-subtle)' }}>
-          Waiting for events…<br /><span>Click ▶ Run Demo to start</span>
+          Waiting for events…
+          {!isLoggedIn && <><br /><span>Click ▶ Run Demo to start</span></>}
         </div>
       ) : (
         pagedEntries.map(entry => (

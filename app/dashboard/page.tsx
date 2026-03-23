@@ -135,6 +135,7 @@ export default function DashboardPage() {
               onRevoke={registry.revokeAgent}
               onRevokeService={registry.revokeService}
               onPanic={registry.panicRevoke}
+              isLoggedIn={!!userName}
             />
           </div>
         </div>
@@ -154,7 +155,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="flex-1 p-3 overflow-hidden" style={{ background: 'var(--color-bg-surface)' }}>
-            <LiveFeed events={events} />
+            <LiveFeed events={events} isLoggedIn={!!userName} />
           </div>
         </div>
 
