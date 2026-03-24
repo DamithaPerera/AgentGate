@@ -6,10 +6,10 @@ import type { AuditEntry } from '@/lib/types';
 interface Props { entries: AuditEntry[] }
 
 const SEGMENTS = [
-  { key: 'ALLOWED',   label: 'Allowed',   desc: 'Requests approved by policy',              color: '#12b76a' },
-  { key: 'DENIED',    label: 'Denied',    desc: 'Requests blocked — policy violation',       color: '#ef4444' },
-  { key: 'ESCALATED', label: 'Escalated', desc: 'Sent for human approval via CIBA',          color: '#f59e0b' },
-  { key: 'REVOKED',   label: 'Revoked',   desc: 'Token or agent access revoked',             color: '#8b5cf6' },
+  { key: 'ALLOWED',   label: 'Allowed',   desc: 'Requests approved by policy',         color: '#12b76a' },
+  { key: 'DENIED',    label: 'Denied',    desc: 'Requests blocked — policy violation',  color: '#ef4444' },
+  { key: 'ESCALATED', label: 'Escalated', desc: 'Sent for human approval via CIBA',     color: '#f59e0b' },
+  { key: 'REVOKED',   label: 'Revoked',   desc: 'Token or agent access revoked',        color: '#8b5cf6' },
 ];
 
 export function DecisionRatioBar({ entries }: Props) {
@@ -17,30 +17,39 @@ export function DecisionRatioBar({ entries }: Props) {
   const tipRef  = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
 
-  const data = SEGMENTS.map(s => ({ ...s, count: entries.filter(e => e.decision === s.key).length }));
+  const data    = SEGMENTS.map(s => ({ ...s, count: entries.filter(e => e.decision === s.key).length }));
+  const nonZero = data.filter(d => d.count > 0);
   const total   = data.reduce((s, d) => s + d.count, 0);
   const allowed = data.find(d => d.key === 'ALLOWED')?.count ?? 0;
   const pct     = total > 0 ? Math.round((allowed / total) * 100) : 0;
 
   useEffect(() => {
     if (!svgRef.current) return;
-    const W = 220, H = 56, BAR_Y = 22, BAR_H = 14;
+    const W = 220, H = 72, BAR_Y = 20, BAR_H = 14, R = 7;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
     svg.attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H);
 
     if (total === 0) {
-      svg.append('rect').attr('x', 0).attr('y', BAR_Y).attr('width', W).attr('height', BAR_H).attr('rx', 7).attr('fill', '#e2e4ef');
-      svg.append('text').attr('x', W / 2).attr('y', BAR_Y - 7).attr('text-anchor', 'middle')
-        .attr('font-size', 10).attr('fill', '#9498b3').text('No decisions yet');
+      svg.append('rect').attr('x', 0).attr('y', BAR_Y).attr('width', W)
+        .attr('height', BAR_H).attr('rx', R).attr('fill', '#e2e4ef');
       return;
     }
 
     // % label
     svg.append('text').attr('x', W / 2).attr('y', BAR_Y - 7)
-      .attr('text-anchor', 'middle').attr('font-size', 11).attr('font-weight', 700).attr('fill', '#1a1d2e')
+      .attr('text-anchor', 'middle').attr('font-size', 11)
+      .attr('font-weight', 700).attr('fill', '#1a1d2e')
       .text(`${pct}% allow rate`);
+
+    // ── Single clip path that rounds only the two outer ends ──────────────
+    const defs = svg.append('defs');
+    defs.append('clipPath').attr('id', 'barClip')
+      .append('rect').attr('x', 0).attr('y', BAR_Y)
+      .attr('width', W).attr('height', BAR_H).attr('rx', R);
+
+    const barGroup = svg.append('g').attr('clip-path', 'url(#barClip)');
 
     const showTip = (event: MouseEvent, d: typeof data[0]) => {
       const tip = tipRef.current; const wrap = wrapRef.current;
@@ -55,37 +64,23 @@ export function DecisionRatioBar({ entries }: Props) {
           <span style="color:#9498b3;font-size:12px">${p}% of requests</span>
         </div>`;
       tip.style.display = 'block';
-      tip.style.left = `${event.clientX - rect.left + 12}px`;
-      tip.style.top  = `${event.clientY - rect.top  - 10}px`;
+      const tx = event.clientX - rect.left + 12;
+      tip.style.left = tx + 170 > rect.width ? `${event.clientX - rect.left - 182}px` : `${tx}px`;
+      tip.style.top  = `${event.clientY - rect.top - 10}px`;
     };
     const hideTip = () => { if (tipRef.current) tipRef.current.style.display = 'none'; };
 
-    // Draw segments
-    const nonZero = data.filter(d => d.count > 0);
+    // Draw each segment as a plain rect (clipping handles the rounded ends)
     let cursor = 0;
     nonZero.forEach((d, i) => {
       const segW = (d.count / total) * W;
-      const isFirst = i === 0, isLast = i === nonZero.length - 1;
 
-      // Rounded ends via clip path
-      const clipId = `clip-${d.key}`;
-      const defs = svg.append('defs');
-      const cp = defs.append('clipPath').attr('id', clipId);
-      cp.append('rect')
+      barGroup.append('rect')
         .attr('x', cursor).attr('y', BAR_Y)
-        .attr('width', segW).attr('height', BAR_H)
-        .attr('rx', isFirst || isLast ? 7 : 0);
-
-      svg.append('rect')
-        .attr('x', cursor).attr('y', BAR_Y)
-        .attr('width', 0).attr('height', BAR_H)
-        .attr('fill', d.color).attr('opacity', 0.88)
-        .attr('clip-path', `url(#${clipId})`)
+        .attr('height', BAR_H).attr('fill', d.color).attr('opacity', 0.88)
+        .attr('width', 0)
         .style('cursor', 'pointer')
-        .on('mouseenter', function(event: MouseEvent) {
-          d3.select(this).attr('opacity', 1);
-          showTip(event, d);
-        })
+        .on('mouseenter', function(event: MouseEvent) { d3.select(this).attr('opacity', 1); showTip(event, d); })
         .on('mousemove', (event: MouseEvent) => showTip(event, d))
         .on('mouseleave', function() { d3.select(this).attr('opacity', 0.88); hideTip(); })
         .transition().duration(600).ease(d3.easeCubicOut).delay(i * 80)
@@ -94,15 +89,18 @@ export function DecisionRatioBar({ entries }: Props) {
       cursor += segW;
     });
 
-    // Legend
-    const legendY = BAR_Y + BAR_H + 14;
-    let lx = 0;
-    nonZero.forEach(d => {
-      svg.append('circle').attr('cx', lx + 4).attr('cy', legendY).attr('r', 3.5).attr('fill', d.color);
-      svg.append('text').attr('x', lx + 11).attr('y', legendY + 4)
-        .attr('font-size', 8.5).attr('fill', '#5c6078')
+    // ── Legend — two columns ──────────────────────────────────────────────
+    const LEG_Y = BAR_Y + BAR_H + 14;
+    const COL_W = W / 2;
+    nonZero.forEach((d, i) => {
+      const col = i % 2;
+      const row = Math.floor(i / 2);
+      const lx = col * COL_W;
+      const ly = LEG_Y + row * 13;
+      svg.append('circle').attr('cx', lx + 5).attr('cy', ly).attr('r', 3.5).attr('fill', d.color);
+      svg.append('text').attr('x', lx + 13).attr('y', ly + 4)
+        .attr('font-size', 9).attr('fill', '#5c6078')
         .text(`${d.label} ${d.count}`);
-      lx += 58;
     });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,7 +123,9 @@ export function DecisionRatioBar({ entries }: Props) {
           <div className="text-[11px] text-[#9498b3] mt-0.5">allowed requests</div>
         </div>
         <div className="text-right">
-          <div className="text-[13px] font-bold text-[#ef4444] leading-none">{data.find(d => d.key === 'DENIED')?.count ?? 0}</div>
+          <div className="text-[13px] font-bold text-[#ef4444] leading-none">
+            {data.find(d => d.key === 'DENIED')?.count ?? 0}
+          </div>
           <div className="text-[9px] text-[#9498b3]">denied</div>
         </div>
       </div>

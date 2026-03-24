@@ -5,7 +5,7 @@ import { CIBACard, type CIBARequest } from './CIBACard';
 import { Pagination } from './Pagination';
 import { Badge, StatusDot, EmptyState } from './ui';
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 interface FeedEntry {
   id: string; timestamp: string; type: string;
