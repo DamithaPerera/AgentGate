@@ -11,6 +11,10 @@ import { useAgentRegistry } from './hooks/useAgentRegistry';
 import { useAuditTrail } from './hooks/useAuditTrail';
 import type { AgentEvent, PolicyRule } from '@/lib/types';
 import { StatusDot } from './components/ui';
+import { DecisionDonut } from './components/DecisionDonut';
+import { ActivitySparkline } from './components/ActivitySparkline';
+import { EventTypeBar } from './components/EventTypeBar';
+import { DecisionRatioBar } from './components/DecisionRatioBar';
 
 export default function DashboardPage() {
   const [events, setEvents] = useState<AgentEvent[]>([]);
@@ -212,6 +216,42 @@ export default function DashboardPage() {
           {/* Card body */}
           <div className="px-5 py-4">
             <PolicyEditor rules={rules} onRulesChange={setRules} />
+          </div>
+        </div>
+
+        {/* ── Analytics Row ─────────────────────────────────────────── */}
+        <div className="grid gap-5" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr' }}>
+
+          {/* Chart: Total Events by Type */}
+          <div className="bg-white rounded-[14px] px-5 py-4"
+            style={{ border: '1px solid #e2e4ef', boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+            <span className="text-[11px] text-[#9498b3] uppercase tracking-wide font-semibold block mb-2"
+              style={{ fontFamily: 'var(--font-ibm-plex-mono)' }}>Total Events</span>
+            <EventTypeBar entries={audit.entries} />
+          </div>
+
+          {/* Chart: Decision Ratio Bar */}
+          <div className="bg-white rounded-[14px] px-5 py-4"
+            style={{ border: '1px solid #e2e4ef', boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+            <span className="text-[11px] text-[#9498b3] uppercase tracking-wide font-semibold block mb-2"
+              style={{ fontFamily: 'var(--font-ibm-plex-mono)' }}>Allow Rate</span>
+            <DecisionRatioBar entries={audit.entries} />
+          </div>
+
+          {/* Chart: Decision Donut */}
+          <div className="bg-white rounded-[14px] px-5 py-4"
+            style={{ border: '1px solid #e2e4ef', boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+            <span className="text-[11px] text-[#9498b3] uppercase tracking-wide font-semibold block mb-2"
+              style={{ fontFamily: 'var(--font-ibm-plex-mono)' }}>Decision Breakdown</span>
+            <DecisionDonut entries={audit.entries} />
+          </div>
+
+          {/* Chart: Activity Sparkline */}
+          <div className="bg-white rounded-[14px] px-5 py-4"
+            style={{ border: '1px solid #e2e4ef', boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+            <span className="text-[11px] text-[#9498b3] uppercase tracking-wide font-semibold block mb-2"
+              style={{ fontFamily: 'var(--font-ibm-plex-mono)' }}>Activity</span>
+            <ActivitySparkline events={events} />
           </div>
         </div>
 
