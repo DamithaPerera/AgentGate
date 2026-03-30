@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:agent": "tsx scripts/test-agent.ts"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.16.0",
@@ -43,6 +44,7 @@
     "eslint-config-next": "14.2.35",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.2"
   }
 }
