@@ -1,12 +1,26 @@
 import { nanoid } from 'nanoid';
-import { storage } from '@/lib/storage/redis';
+import { eq } from 'drizzle-orm';
+import { db } from '@/lib/storage/db';
+import { agents } from '@/lib/storage/schema';
 import { generateSpiffeId } from '@/lib/identity/spiffe';
 import { signAgentToken } from '@/lib/identity/jwt';
 import { eventBus } from '@/lib/events/event-bus';
 import type { AgentIdentity } from '@/lib/types';
 
-const AGENT_PREFIX = 'agent:';
-const AGENTS_LIST_KEY = 'agents:list';
+function rowToAgent(row: typeof agents.$inferSelect): AgentIdentity {
+  return {
+    id:           row.id,
+    spiffeId:     row.spiffeId,
+    name:         row.name,
+    framework:    row.framework as AgentIdentity['framework'],
+    capabilities: row.capabilities as string[],
+    trustLevel:   row.trustLevel,
+    registeredAt: row.registeredAt,
+    registeredBy: row.registeredBy,
+    status:       row.status as AgentIdentity['status'],
+    lastActivity: row.lastActivity,
+  };
+}
 
 export async function registerAgent(params: {
   name: string;
@@ -15,33 +29,42 @@ export async function registerAgent(params: {
   trustLevel: number;
   registeredBy: string;
 }): Promise<{ agent: AgentIdentity; token: string }> {
-  const id = nanoid(12);
-  const spiffeId = generateSpiffeId(id);
+  const id  = nanoid(12);
   const now = new Date().toISOString();
 
   const agent: AgentIdentity = {
     id,
-    spiffeId,
-    name: params.name,
-    framework: params.framework,
+    spiffeId:     generateSpiffeId(id),
+    name:         params.name,
+    framework:    params.framework,
     capabilities: params.capabilities,
-    trustLevel: Math.min(5, Math.max(1, params.trustLevel)),
+    trustLevel:   Math.min(5, Math.max(1, params.trustLevel)),
     registeredAt: now,
     registeredBy: params.registeredBy,
-    status: 'active',
+    status:       'active',
     lastActivity: now,
   };
 
-  await storage.set(`${AGENT_PREFIX}${id}`, JSON.stringify(agent));
-  await storage.lpush(AGENTS_LIST_KEY, id);
+  await db().insert(agents).values({
+    id:           agent.id,
+    spiffeId:     agent.spiffeId,
+    name:         agent.name,
+    framework:    agent.framework,
+    capabilities: agent.capabilities,
+    trustLevel:   agent.trustLevel,
+    registeredAt: agent.registeredAt,
+    registeredBy: agent.registeredBy,
+    status:       agent.status,
+    lastActivity: agent.lastActivity,
+  });
 
   const token = await signAgentToken(agent);
 
   eventBus.emit('agent_registered', {
-    agentId: id,
-    agentName: agent.name,
-    framework: agent.framework,
-    trustLevel: agent.trustLevel,
+    agentId:      id,
+    agentName:    agent.name,
+    framework:    agent.framework,
+    trustLevel:   agent.trustLevel,
     capabilities: agent.capabilities,
   });
 
@@ -49,33 +72,32 @@ export async function registerAgent(params: {
 }
 
 export async function getAgent(id: string): Promise<AgentIdentity | null> {
-  const raw = await storage.get(`${AGENT_PREFIX}${id}`);
-  if (!raw) return null;
-  return JSON.parse(raw) as AgentIdentity;
+  const rows = await db().select().from(agents).where(eq(agents.id, id)).limit(1);
+  return rows.length ? rowToAgent(rows[0]) : null;
 }
 
 export async function listAgents(): Promise<AgentIdentity[]> {
-  const ids = await storage.lrange(AGENTS_LIST_KEY, 0, -1);
-  const agents = await Promise.all(ids.map(id => getAgent(id)));
-  return agents.filter((a): a is AgentIdentity => a !== null);
+  const rows = await db().select().from(agents);
+  return rows.map(rowToAgent);
 }
 
 export async function updateAgentStatus(
   id: string,
   status: AgentIdentity['status']
 ): Promise<AgentIdentity | null> {
-  const agent = await getAgent(id);
-  if (!agent) return null;
-  const updated = { ...agent, status, lastActivity: new Date().toISOString() };
-  await storage.set(`${AGENT_PREFIX}${id}`, JSON.stringify(updated));
-  return updated;
+  const rows = await db()
+    .update(agents)
+    .set({ status, lastActivity: new Date().toISOString() })
+    .where(eq(agents.id, id))
+    .returning();
+  return rows.length ? rowToAgent(rows[0]) : null;
 }
 
 export async function updateAgentActivity(id: string): Promise<void> {
-  const agent = await getAgent(id);
-  if (!agent) return;
-  const updated = { ...agent, lastActivity: new Date().toISOString() };
-  await storage.set(`${AGENT_PREFIX}${id}`, JSON.stringify(updated));
+  await db()
+    .update(agents)
+    .set({ lastActivity: new Date().toISOString() })
+    .where(eq(agents.id, id));
 }
 
 export async function revokeAgent(id: string): Promise<boolean> {

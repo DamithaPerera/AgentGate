@@ -1,90 +1,87 @@
-import { storage } from '@/lib/storage/redis';
+import { eq } from 'drizzle-orm';
+import { db } from '@/lib/storage/db';
+import { policyRules as rulesTable } from '@/lib/storage/schema';
 import { DEFAULT_RULES } from '@/lib/policy/default-rules';
 import type { AuthorizationRequest, PolicyDecision, PolicyResult, PolicyRule } from '@/lib/types';
 
-const RULES_KEY = 'policy:rules';
+function rowToRule(row: typeof rulesTable.$inferSelect): PolicyRule {
+  return {
+    id:          row.id,
+    name:        row.name,
+    description: row.description,
+    condition:   row.condition as PolicyRule['condition'],
+    decision:    row.decision as PolicyDecision,
+    enabled:     row.enabled,
+    createdAt:   row.createdAt,
+  };
+}
 
-// Load active rules from storage (falls back to defaults)
 async function loadRules(): Promise<PolicyRule[]> {
-  const raw = await storage.get(RULES_KEY);
-  if (!raw) return DEFAULT_RULES;
   try {
-    return JSON.parse(raw) as PolicyRule[];
+    const rows = await db()
+      .select()
+      .from(rulesTable)
+      .orderBy(rulesTable.sortOrder);
+    if (rows.length > 0) return rows.map(rowToRule);
   } catch {
-    return DEFAULT_RULES;
+    // DB not yet migrated or unavailable — fall back to defaults
   }
+  return DEFAULT_RULES;
 }
 
 export async function saveRules(rules: PolicyRule[]): Promise<void> {
-  await storage.set(RULES_KEY, JSON.stringify(rules));
+  // Upsert all rules in one transaction
+  await db().transaction(async tx => {
+    for (let i = 0; i < rules.length; i++) {
+      const r = rules[i];
+      await tx
+        .insert(rulesTable)
+        .values({
+          id:          r.id,
+          name:        r.name,
+          description: r.description,
+          condition:   r.condition as Record<string, unknown>,
+          decision:    r.decision,
+          enabled:     r.enabled,
+          createdAt:   r.createdAt,
+          sortOrder:   i,
+        })
+        .onConflictDoUpdate({
+          target: rulesTable.id,
+          set: {
+            name:        r.name,
+            description: r.description,
+            condition:   r.condition as Record<string, unknown>,
+            decision:    r.decision,
+            enabled:     r.enabled,
+            sortOrder:   i,
+          },
+        });
+    }
+  });
 }
 
 export async function getRules(): Promise<PolicyRule[]> {
   return loadRules();
 }
 
-function matchesCondition(
-  rule: PolicyRule,
-  request: AuthorizationRequest
-): boolean {
+function matchesCondition(rule: PolicyRule, request: AuthorizationRequest): boolean {
   const { condition } = rule;
 
-  // Action type filter
-  if (condition.actionTypes && !condition.actionTypes.includes(request.action.type)) {
-    return false;
-  }
+  if (condition.actionTypes && !condition.actionTypes.includes(request.action.type)) return false;
+  if (condition.services    && !condition.services.includes(request.action.service))  return false;
+  if (condition.minTrustLevel !== undefined && request.subject.trustLevel < condition.minTrustLevel) return false;
+  if (condition.maxTrustLevel !== undefined && request.subject.trustLevel > condition.maxTrustLevel) return false;
+  if (condition.recipientExternal !== undefined && request.context.recipientExternal !== condition.recipientExternal) return false;
 
-  // Service filter
-  if (condition.services && !condition.services.includes(request.action.service)) {
-    return false;
-  }
+  if (condition.maxRequestsPerMinute !== undefined && rule.decision === 'DENY' &&
+      request.context.requestsThisMinute <= condition.maxRequestsPerMinute) return false;
 
-  // Min trust level
-  if (
-    condition.minTrustLevel !== undefined &&
-    request.subject.trustLevel < condition.minTrustLevel
-  ) {
-    return false;
-  }
+  if (condition.maxRequestsPerMinute !== undefined && rule.decision === 'ALLOW' &&
+      request.context.requestsThisMinute > condition.maxRequestsPerMinute) return false;
 
-  // Max trust level
-  if (
-    condition.maxTrustLevel !== undefined &&
-    request.subject.trustLevel > condition.maxTrustLevel
-  ) {
-    return false;
-  }
-
-  // External recipient
-  if (
-    condition.recipientExternal !== undefined &&
-    request.context.recipientExternal !== condition.recipientExternal
-  ) {
-    return false;
-  }
-
-  // Rate limit: deny-rate-limit rule fires when requestsThisMinute EXCEEDS limit
-  if (
-    condition.maxRequestsPerMinute !== undefined &&
-    rule.decision === 'DENY' &&
-    request.context.requestsThisMinute <= condition.maxRequestsPerMinute
-  ) {
-    return false;
-  }
-
-  // For ALLOW rule, require rate is within limit
-  if (
-    condition.maxRequestsPerMinute !== undefined &&
-    rule.decision === 'ALLOW' &&
-    request.context.requestsThisMinute > condition.maxRequestsPerMinute
-  ) {
-    return false;
-  }
-
-  // Required capability
   if (condition.requireCapability) {
-    const hasCapability = request.subject.capabilities.includes(condition.requireCapability);
-    if (!hasCapability) return false;
+    if (!request.subject.capabilities.includes(condition.requireCapability)) return false;
   }
 
   return true;
@@ -93,10 +90,9 @@ function matchesCondition(
 export async function evaluate(request: AuthorizationRequest): Promise<PolicyResult> {
   const start = Date.now();
   const rules = await loadRules();
-  const enabledRules = rules.filter(r => r.enabled);
+  const enabled = rules.filter(r => r.enabled);
 
-  // Check if action is within declared capabilities
-  const serviceScope = `${request.action.service}.${request.action.type}`;
+  const serviceScope  = `${request.action.service}.${request.action.type}`;
   const hasCapability = request.subject.capabilities.some(
     cap => cap === serviceScope || cap === `${request.action.service}.*`
   );
@@ -104,56 +100,29 @@ export async function evaluate(request: AuthorizationRequest): Promise<PolicyRes
   if (!hasCapability) {
     return {
       decision: 'DENY',
-      reason: `Agent does not have capability '${serviceScope}'. Declared capabilities: ${request.subject.capabilities.join(', ')}`,
+      reason: `Agent does not have capability '${serviceScope}'. Declared: ${request.subject.capabilities.join(', ')}`,
       policyId: 'capability-check',
       evaluationTimeMs: Date.now() - start,
     };
   }
 
-  // Priority: DENY > ESCALATE > ALLOW
-  // Evaluate DENY rules first
-  for (const rule of enabledRules) {
+  for (const rule of enabled) {
     if (rule.decision === 'DENY' && matchesCondition(rule, request)) {
-      return {
-        decision: 'DENY',
-        reason: rule.description,
-        policyId: rule.id,
-        evaluationTimeMs: Date.now() - start,
-      };
+      return { decision: 'DENY', reason: rule.description, policyId: rule.id, evaluationTimeMs: Date.now() - start };
     }
   }
-
-  // Then ESCALATE rules
-  for (const rule of enabledRules) {
+  for (const rule of enabled) {
     if (rule.decision === 'ESCALATE' && matchesCondition(rule, request)) {
-      return {
-        decision: 'ESCALATE',
-        reason: rule.description,
-        policyId: rule.id,
-        evaluationTimeMs: Date.now() - start,
-      };
+      return { decision: 'ESCALATE', reason: rule.description, policyId: rule.id, evaluationTimeMs: Date.now() - start };
     }
   }
-
-  // Then ALLOW rules
-  for (const rule of enabledRules) {
+  for (const rule of enabled) {
     if (rule.decision === 'ALLOW' && matchesCondition(rule, request)) {
-      return {
-        decision: 'ALLOW',
-        reason: rule.description,
-        policyId: rule.id,
-        evaluationTimeMs: Date.now() - start,
-      };
+      return { decision: 'ALLOW', reason: rule.description, policyId: rule.id, evaluationTimeMs: Date.now() - start };
     }
   }
 
-  // Default deny
-  return {
-    decision: 'DENY',
-    reason: 'No policy rule matched. Default deny.',
-    policyId: 'default-deny',
-    evaluationTimeMs: Date.now() - start,
-  };
+  return { decision: 'DENY', reason: 'No policy rule matched. Default deny.', policyId: 'default-deny', evaluationTimeMs: Date.now() - start };
 }
 
 export type { PolicyDecision, PolicyResult };
