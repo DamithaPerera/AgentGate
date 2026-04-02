@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth0 } from '@/lib/auth0';
 import { z } from 'zod';
 import { registerAgent } from '@/lib/identity/agent-registry';
 import { logEntry } from '@/lib/audit/audit-logger';
+import { withAuth, AuthContext } from '@/lib/auth/api-auth';
 
 const RegisterSchema = z.object({
   name: z.string().min(1).max(100),
@@ -11,10 +11,8 @@ const RegisterSchema = z.object({
   trustLevel: z.number().int().min(1).max(5).default(2),
 });
 
-export async function POST(req: NextRequest) {
-  // Allow unauthenticated for demo (session check is soft)
-  const session = await auth0.getSession();
-  const userId = session?.user?.sub ?? 'demo-user';
+export const POST = withAuth(async (req: NextRequest, auth: AuthContext) => {
+  const userId = auth.userId;
 
   try {
     const body = await req.json();
@@ -49,4 +47,4 @@ export async function POST(req: NextRequest) {
     console.error('[register]', err);
     return NextResponse.json({ error: 'Registration failed' }, { status: 500 });
   }
-}
+});

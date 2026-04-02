@@ -12,6 +12,9 @@ export default function LandingPage() {
             <span style={{ fontWeight: 700, fontSize: 18, color: '#0F172A' }}>AgentGate</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Link href="/docs" style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: 'transparent', color: '#2D3748', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
+              Docs
+            </Link>
             <Link href="/auth/login?returnTo=/dashboard" style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'transparent', color: '#2D3748', fontWeight: 600, fontSize: 14, textDecoration: 'none', transition: 'background 0.2s' }}>
               Log in
             </Link>

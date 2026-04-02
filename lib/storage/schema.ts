@@ -2,6 +2,19 @@ import {
   pgTable, text, integer, boolean, timestamp, jsonb, serial,
 } from 'drizzle-orm/pg-core';
 
+// ── API Keys ──────────────────────────────────────────────────────────────────
+export const apiKeys = pgTable('api_keys', {
+  id:          text('id').primaryKey(),           // nanoid(16)
+  userId:      text('user_id').notNull(),          // Auth0 sub
+  name:        text('name').notNull(),             // "My Agent Key"
+  keyHash:     text('key_hash').notNull().unique(), // SHA-256 of the key
+  keyPrefix:   text('key_prefix').notNull(),       // first 8 chars for display "ag_live_xxxx..."
+  createdAt:   text('created_at').notNull(),
+  lastUsedAt:  text('last_used_at'),
+  revokedAt:   text('revoked_at'),
+  isActive:    boolean('is_active').notNull().default(true),
+});
+
 // ── Agents ────────────────────────────────────────────────────────────────────
 export const agents = pgTable('agents', {
   id:           text('id').primaryKey(),

@@ -1,10 +1,9 @@
-import { NextResponse } from 'next/server';
-import { auth0 } from '@/lib/auth0';
+import { NextRequest, NextResponse } from 'next/server';
 import { panicRevocation } from '@/lib/revocation/cascade-engine';
+import { withAuth, AuthContext } from '@/lib/auth/api-auth';
 
-export async function POST() {
-  const session = await auth0.getSession();
-  const userId = session?.user?.sub ?? 'demo-user';
+export const POST = withAuth(async (_req: NextRequest, auth: AuthContext) => {
+  const userId = auth.userId;
   const result = await panicRevocation(userId);
   return NextResponse.json({ success: true, ...result });
-}
+});

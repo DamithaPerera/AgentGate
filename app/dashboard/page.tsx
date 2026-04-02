@@ -15,6 +15,7 @@ import { DecisionDonut } from './components/DecisionDonut';
 import { ActivitySparkline } from './components/ActivitySparkline';
 import { EventTypeBar } from './components/EventTypeBar';
 import { DecisionRatioBar } from './components/DecisionRatioBar';
+import { ApiKeys } from './components/ApiKeys';
 
 export default function DashboardPage() {
   const [events, setEvents] = useState<AgentEvent[]>([]);
@@ -393,6 +394,11 @@ export default function DashboardPage() {
               />
             </div>
           </div>
+        </div>
+
+        {/* ── API Keys ──────────────────────────────────────────────── */}
+        <div className="animate-fadeUp" style={{ animationDelay: '0.24s' }}>
+          <ApiKeys />
         </div>
 
         {/* ── Bottom bar ──────────────────────────────────────────────── */}
