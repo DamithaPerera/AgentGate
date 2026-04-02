@@ -140,20 +140,35 @@ export default function DashboardPage() {
 
           {/* Right — actions */}
           <div className="flex items-center gap-2">
-            {!userName && (
-              <button
-                onClick={runDemo}
-                disabled={demoRunning}
-                className="px-4 py-[7px] rounded-[10px] text-white font-semibold text-[13px] border-none cursor-pointer transition-opacity"
-                style={{
-                  background: 'linear-gradient(135deg, #3b6cff, #6b8fff)',
-                  opacity: demoRunning ? 0.55 : 1,
-                  boxShadow: '0 2px 8px rgba(59,108,255,0.28)',
-                }}
-              >
-                {demoRunning ? '⟳ Running…' : '▶ Run Demo'}
-              </button>
-            )}
+            <button
+              onClick={runDemo}
+              disabled={demoRunning}
+              className="flex items-center gap-2 px-4 py-[7px] rounded-[10px] text-white font-semibold text-[13px] border-none transition-all"
+              style={{
+                background: demoRunning
+                  ? 'linear-gradient(135deg, #5c6078, #9498b3)'
+                  : 'linear-gradient(135deg, #3b6cff, #6b8fff)',
+                boxShadow: demoRunning ? 'none' : '0 2px 8px rgba(59,108,255,0.28)',
+                cursor: demoRunning ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {demoRunning ? (
+                <>
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className="animate-spin shrink-0">
+                    <circle cx="6.5" cy="6.5" r="5.5" stroke="rgba(255,255,255,0.3)" strokeWidth="2"/>
+                    <path d="M6.5 1a5.5 5.5 0 0 1 5.5 5.5" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  Running Demo…
+                </>
+              ) : (
+                <>
+                  <svg width="11" height="13" viewBox="0 0 11 13" fill="white" className="shrink-0">
+                    <path d="M0 0L11 6.5L0 13V0Z"/>
+                  </svg>
+                  Run Demo
+                </>
+              )}
+            </button>
             {userName && (
               <div
                 className="flex items-center gap-2 rounded-[10px] px-3 py-[5px]"
