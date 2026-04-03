@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getAgent } from '@/lib/identity/agent-registry';
 import { signAgentToken } from '@/lib/identity/jwt';

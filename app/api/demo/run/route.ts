@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { auth0 } from '@/lib/auth0';
 import { runDemoScenario } from '@/lib/agents/demo-agents';
