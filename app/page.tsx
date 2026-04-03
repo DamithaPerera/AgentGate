@@ -8,13 +8,16 @@ export default function LandingPage() {
       <nav style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #E2E8F0', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 8, background: 'linear-gradient(135deg, #0052CC, #0065FF)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 14 }}>AG</div>
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 14, boxShadow: '0 2px 8px rgba(59,108,255,0.28)' }}>AG</div>
             <span style={{ fontWeight: 700, fontSize: 18, color: '#0F172A' }}>AgentGate</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Link href="/docs" style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: 'transparent', color: '#2D3748', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
               Docs
             </Link>
+            <a href="https://github.com/DamithaPerera/AgentGate" target="_blank" rel="noopener noreferrer" style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: 'transparent', color: '#2D3748', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
+              GitHub
+            </a>
             <Link href="/auth/login?returnTo=/dashboard" style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'transparent', color: '#2D3748', fontWeight: 600, fontSize: 14, textDecoration: 'none', transition: 'background 0.2s' }}>
               Log in
             </Link>
@@ -152,6 +155,59 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Quick start ─────────────────────────────────────────── */}
+      <section style={{ background: '#fff', padding: '100px 24px', borderTop: '1px solid #E2E8F0' }}>
+        <div style={{ maxWidth: 860, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <div className="animate-fade-in-up" style={{ display: 'inline-block', background: '#F0FDF4', color: '#15803D', fontWeight: 600, fontSize: 13, padding: '4px 14px', borderRadius: 999, marginBottom: 16 }}>Quick Start</div>
+            <h2 className="animate-fade-in-up delay-100" style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: 800, color: '#0F172A', marginBottom: 12, letterSpacing: '-0.02em' }}>Connect your agent in 2 API calls</h2>
+            <p className="animate-fade-in-up delay-200" style={{ color: '#64748B', fontSize: 15 }}>No SDK required. Any agent that can make HTTP requests works.</p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: 20 }}>
+            {/* Step 1 */}
+            <div className="animate-fade-in-up delay-100" style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid #E2E8F0', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+              <div style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#0052CC', color: '#fff', fontWeight: 800, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>1</span>
+                <span style={{ fontWeight: 600, fontSize: 13, color: '#374151' }}>Register your agent</span>
+              </div>
+              <pre style={{ margin: 0, padding: '20px', background: '#0F172A', color: '#E2E8F0', fontSize: 12, lineHeight: 1.7, overflowX: 'auto', fontFamily: "'IBM Plex Mono', 'Fira Code', monospace" }}>{`curl -X POST /api/agents/register \\
+  -H "Authorization: Bearer ag_live_..." \\
+  -d '{
+    "name": "my-agent",
+    "framework": "crewai",
+    "capabilities": ["gmail.read"],
+    "trustTier": "T1"
+  }'
+# → { "agentId": "...", "token": "eyJ..." }`}</pre>
+            </div>
+
+            {/* Step 2 */}
+            <div className="animate-fade-in-up delay-200" style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid #E2E8F0', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+              <div style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#16A34A', color: '#fff', fontWeight: 800, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>2</span>
+                <span style={{ fontWeight: 600, fontSize: 13, color: '#374151' }}>Authorize every action</span>
+              </div>
+              <pre style={{ margin: 0, padding: '20px', background: '#0F172A', color: '#E2E8F0', fontSize: 12, lineHeight: 1.7, overflowX: 'auto', fontFamily: "'IBM Plex Mono', 'Fira Code', monospace" }}>{`curl -X POST /api/authorize \\
+  -H "Authorization: Bearer ag_live_..." \\
+  -d '{
+    "agentToken": "eyJ...",
+    "action": { "type": "read",
+      "operation": "list_emails",
+      "service": "gmail" }
+  }'
+# → { "allowed": true, "token": {...} }`}</pre>
+            </div>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: 32 }}>
+            <Link href="/docs" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#0052CC', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
+              View full API reference →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ── CTA ─────────────────────────────────────────────────── */}
       <section style={{ background: 'linear-gradient(160deg, #0A0F1E 0%, #0F1E3D 100%)', padding: '100px 24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,82,204,0.2) 0%, transparent 70%)', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }} />
@@ -174,12 +230,17 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ──────────────────────────────────────────────── */}
-      <footer style={{ background: '#060D1A', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '32px 24px', textAlign: 'center' }}>
+      <footer style={{ background: '#060D1A', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '40px 24px', textAlign: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
           <div style={{ width: 28, height: 28, borderRadius: 6, background: 'linear-gradient(135deg, #0052CC, #0065FF)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 11 }}>AG</div>
           <span style={{ fontWeight: 700, fontSize: 15, color: '#94A3B8' }}>AgentGate</span>
         </div>
-        <p style={{ color: '#475569', fontSize: 13, marginBottom: 4 }}>Built for the &quot;Authorized to Act: Auth0 for AI Agents&quot; Hackathon</p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 16, flexWrap: 'wrap' }}>
+          <Link href="/dashboard" style={{ color: '#64748B', fontSize: 13, textDecoration: 'none', fontWeight: 500 }}>Dashboard</Link>
+          <Link href="/docs" style={{ color: '#64748B', fontSize: 13, textDecoration: 'none', fontWeight: 500 }}>API Docs</Link>
+          <a href="https://github.com/DamithaPerera/AgentGate" target="_blank" rel="noopener noreferrer" style={{ color: '#64748B', fontSize: 13, textDecoration: 'none', fontWeight: 500 }}>GitHub</a>
+        </div>
+        <p style={{ color: '#475569', fontSize: 13, marginBottom: 4 }}>Built for the &quot;Authorized to Act: Auth0 for AI Agents&quot; Hackathon · April 2026</p>
         <p style={{ color: '#334155', fontSize: 12 }}>The authorization layer the IETF left as &quot;TODO Security&quot;</p>
       </footer>
     </main>
