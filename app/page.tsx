@@ -21,7 +21,7 @@ export default function LandingPage() {
             <Link href="/auth/login?returnTo=/dashboard" style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'transparent', color: '#2D3748', fontWeight: 600, fontSize: 14, textDecoration: 'none', transition: 'background 0.2s' }}>
               Log in
             </Link>
-            <Link href="/dashboard" style={{ padding: '8px 20px', borderRadius: 8, background: 'linear-gradient(135deg, #0052CC, #0065FF)', color: '#fff', fontWeight: 600, fontSize: 14, textDecoration: 'none', boxShadow: '0 2px 12px rgba(0,82,204,0.35)' }}>
+            <Link href="/dashboard" style={{ padding: '8px 20px', borderRadius: 8, background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)', color: '#fff', fontWeight: 600, fontSize: 14, textDecoration: 'none', boxShadow: '0 2px 12px rgba(59,108,255,0.35)' }}>
               Open Dashboard
             </Link>
           </div>
@@ -31,12 +31,12 @@ export default function LandingPage() {
       {/* ── Hero ────────────────────────────────────────────────── */}
       <section style={{ background: 'linear-gradient(160deg, #0A0F1E 0%, #0F1E3D 50%, #0A1628 100%)', padding: '120px 24px 100px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         {/* Glow orbs */}
-        <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,82,204,0.25) 0%, transparent 70%)', top: -200, left: '10%', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(101,84,192,0.2) 0%, transparent 70%)', top: -100, right: '5%', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,101,255,0.15) 0%, transparent 70%)', bottom: -100, left: '40%', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,108,255,0.25) 0%, transparent 70%)', top: -200, left: '10%', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)', top: -100, right: '5%', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,108,255,0.15) 0%, transparent 70%)', bottom: -100, left: '40%', pointerEvents: 'none' }} />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 820, margin: '0 auto' }} className="animate-fade-in-up">
-          <div className="animate-fade-in-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(0,82,204,0.15)', border: '1px solid rgba(0,101,255,0.3)', borderRadius: 999, padding: '6px 16px', marginBottom: 32 }}>
+          <div className="animate-fade-in-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(59,108,255,0.15)', border: '1px solid rgba(139,92,246,0.35)', borderRadius: 999, padding: '6px 16px', marginBottom: 32 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#36B37E', display: 'inline-block', boxShadow: '0 0 8px #36B37E' }} className="animate-pulse" />
             <span style={{ color: '#93C5FD', fontSize: 13, fontWeight: 500 }}>Built for NIST AI Agent Standards · IETF draft-klrc-aiagent-auth-00</span>
           </div>
@@ -54,7 +54,7 @@ export default function LandingPage() {
           </p>
 
           <div className="animate-fade-in-up delay-300" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <Link href="/dashboard" style={{ padding: '14px 32px', borderRadius: 10, background: 'linear-gradient(135deg, #0052CC, #0065FF)', color: '#fff', fontWeight: 700, fontSize: 15, textDecoration: 'none', boxShadow: '0 4px 24px rgba(0,82,204,0.5)', transition: 'transform 0.2s, box-shadow 0.2s', display: 'inline-block' }}
+            <Link href="/dashboard" style={{ padding: '14px 32px', borderRadius: 10, background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)', color: '#fff', fontWeight: 700, fontSize: 15, textDecoration: 'none', boxShadow: '0 4px 24px rgba(59,108,255,0.5)', transition: 'transform 0.2s, box-shadow 0.2s', display: 'inline-block' }}
               className="hover:scale-105">
               Open Dashboard →
             </Link>
@@ -70,7 +70,7 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32, textAlign: 'center' }}>
           {[
             { value: '93%', label: 'of AI agent projects have no authorization layer', color: '#E11D48' },
-            { value: '< 1ms', label: 'authorization overhead per request', color: '#0052CC' },
+            { value: '< 1ms', label: 'authorization overhead per request', color: '#3b6cff' },
             { value: '5 Gates', label: 'every request passes through before execution', color: '#9333EA' },
             { value: '100%', label: 'tamper-evident audit trail coverage', color: '#16A34A' },
           ].map((s, i) => (
@@ -168,7 +168,7 @@ export default function LandingPage() {
             {/* Step 1 */}
             <div className="animate-fade-in-up delay-100" style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid #E2E8F0', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
               <div style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#0052CC', color: '#fff', fontWeight: 800, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>1</span>
+                <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)', color: '#fff', fontWeight: 800, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>1</span>
                 <span style={{ fontWeight: 600, fontSize: 13, color: '#374151' }}>Register your agent</span>
               </div>
               <pre style={{ margin: 0, padding: '20px', background: '#0F172A', color: '#E2E8F0', fontSize: 12, lineHeight: 1.7, overflowX: 'auto', fontFamily: "'IBM Plex Mono', 'Fira Code', monospace" }}>{`curl -X POST /api/agents/register \\
@@ -201,7 +201,7 @@ export default function LandingPage() {
           </div>
 
           <div style={{ textAlign: 'center', marginTop: 32 }}>
-            <Link href="/docs" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#0052CC', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
+            <Link href="/docs" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#3b6cff', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
               View full API reference →
             </Link>
           </div>
@@ -210,7 +210,7 @@ export default function LandingPage() {
 
       {/* ── CTA ─────────────────────────────────────────────────── */}
       <section style={{ background: 'linear-gradient(160deg, #0A0F1E 0%, #0F1E3D 100%)', padding: '100px 24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,82,204,0.2) 0%, transparent 70%)', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,108,255,0.2) 0%, transparent 70%)', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 640, margin: '0 auto', position: 'relative', zIndex: 1 }} className="animate-fade-in-up">
           <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, color: '#fff', marginBottom: 16, letterSpacing: '-0.02em' }}>
             Ready to secure your AI agents?
@@ -219,7 +219,7 @@ export default function LandingPage() {
             Open the dashboard to watch agents register, request access, trigger CIBA consent, and get cascade-revoked in real-time.
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/dashboard" style={{ padding: '14px 36px', borderRadius: 10, background: 'linear-gradient(135deg, #0052CC, #0065FF)', color: '#fff', fontWeight: 700, fontSize: 16, textDecoration: 'none', boxShadow: '0 4px 24px rgba(0,82,204,0.5)', display: 'inline-block' }}>
+            <Link href="/dashboard" style={{ padding: '14px 36px', borderRadius: 10, background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)', color: '#fff', fontWeight: 700, fontSize: 16, textDecoration: 'none', boxShadow: '0 4px 24px rgba(59,108,255,0.5)', display: 'inline-block' }}>
               Open Dashboard →
             </Link>
             <Link href="/auth/login?returnTo=/dashboard" style={{ padding: '14px 28px', borderRadius: 10, background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600, fontSize: 15, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.15)', display: 'inline-block' }}>
@@ -232,7 +232,7 @@ export default function LandingPage() {
       {/* ── Footer ──────────────────────────────────────────────── */}
       <footer style={{ background: '#060D1A', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '40px 24px', textAlign: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 6, background: 'linear-gradient(135deg, #0052CC, #0065FF)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 11 }}>AG</div>
+          <div style={{ width: 28, height: 28, borderRadius: 6, background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 11, boxShadow: '0 2px 8px rgba(59,108,255,0.28)' }}>AG</div>
           <span style={{ fontWeight: 700, fontSize: 15, color: '#94A3B8' }}>AgentGate</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 16, flexWrap: 'wrap' }}>
