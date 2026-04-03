@@ -52,9 +52,9 @@ export function useAgentEvents(onEvent: EventHandler) {
 
       es.onmessage = (e) => {
         try {
-          const raw = JSON.parse(e.data) as AgentEvent & { type: string };
+          const raw = JSON.parse(e.data) as { type: string; timestamp?: string; data?: Record<string, unknown> };
           if (raw.type !== 'ping' && raw.type !== 'heartbeat') {
-            handlerRef.current(raw as AgentEvent);
+            handlerRef.current(raw as unknown as AgentEvent);
             lastSeen = raw.timestamp ?? lastSeen;
           }
         } catch { /* ignore parse errors */ }
