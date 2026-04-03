@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { CopyButton } from './CopyButton';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -48,12 +49,15 @@ function AuthBadge({ required, note }: { required: boolean; note?: string }) {
   );
 }
 
-function CodeBlock({ code, label }: { code: string; label: string }) {
+function CodeBlock({ code, label, copyable = false }: { code: string; label: string; copyable?: boolean }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-bold text-[#9498b3] uppercase tracking-[0.06em] font-[family-name:var(--font-ibm-plex-mono)]">
-        {label}
-      </span>
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-bold text-[#9498b3] uppercase tracking-[0.06em] font-[family-name:var(--font-ibm-plex-mono)]">
+          {label}
+        </span>
+        {copyable && <CopyButton text={code} />}
+      </div>
       <pre className="bg-[#1e2535] text-[#e2e8f0] font-[family-name:var(--font-ibm-plex-mono)] text-[12px] leading-[1.7] px-[18px] py-4 rounded-[10px] overflow-x-auto m-0 border border-[#2a3447]">
         <code>{code}</code>
       </pre>
@@ -95,7 +99,7 @@ function EndpointCard({ endpoint }: { endpoint: Endpoint }) {
       <div className="p-5 flex flex-col gap-4">
         {endpoint.requestBody && <CodeBlock label="Request Body" code={endpoint.requestBody} />}
         <CodeBlock label="Response" code={endpoint.response} />
-        <CodeBlock label="cURL Example" code={endpoint.curl} />
+        <CodeBlock label="cURL Example" code={endpoint.curl} copyable />
       </div>
     </Card>
   );
