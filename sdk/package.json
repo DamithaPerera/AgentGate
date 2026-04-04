@@ -7,9 +7,9 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     }
   },
   "scripts": {
@@ -18,8 +18,16 @@
     "prepublishOnly": "npm run build"
   },
   "keywords": [
-    "ai-agent", "authorization", "auth0", "security", "middleware",
-    "crewai", "langgraph", "autogen", "mcp", "agentgate"
+    "ai-agent",
+    "authorization",
+    "auth0",
+    "security",
+    "middleware",
+    "crewai",
+    "langgraph",
+    "autogen",
+    "mcp",
+    "agentgate"
   ],
   "author": "AgentGate",
   "license": "MIT",
@@ -28,9 +36,12 @@
     "url": "https://github.com/DamithPerera/AgentGate"
   },
   "homepage": "https://agent-gate-theta.vercel.app/docs",
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "devDependencies": {
-    "tsup": "^8.0.0",
-    "typescript": "^5.0.0"
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
   }
 }
