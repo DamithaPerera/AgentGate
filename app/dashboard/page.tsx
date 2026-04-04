@@ -1,6 +1,5 @@
 'use client';
 import { useState, useCallback, useEffect } from 'react';
-import Link from 'next/link';
 import { toast } from 'sonner';
 import { AgentRegistry } from './components/AgentRegistry';
 import { LiveFeed } from './components/LiveFeed';
@@ -10,7 +9,7 @@ import { useAgentEvents } from './hooks/useAgentEvents';
 import { useAgentRegistry } from './hooks/useAgentRegistry';
 import { useAuditTrail } from './hooks/useAuditTrail';
 import type { AgentEvent, PolicyRule } from '@/lib/types';
-import { StatusDot, KpiCard, TabBar, TabConfig, SectionHeader, LivePill } from './components/ui';
+import { StatusDot, KpiCard, DashboardSidebar, TabConfig, SectionHeader, LivePill } from './components/ui';
 import { DecisionDonut } from './components/DecisionDonut';
 import { ActivitySparkline } from './components/ActivitySparkline';
 import { EventTypeBar } from './components/EventTypeBar';
@@ -105,129 +104,91 @@ export default function DashboardPage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col"
-      style={{ background: '#f6f7fb', fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif' }}
+      className="flex h-screen overflow-hidden"
+      style={{ fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif' }}
     >
+      {/* ── Dark sidebar ─────────────────────────────────────────────── */}
+      <DashboardSidebar
+        tabs={tabs}
+        activeId={activeTab}
+        onChange={id => setActiveTab(id as typeof activeTab)}
+        userName={userName}
+        activeCount={activeCount}
+        logoutHref="/auth/logout"
+        loginHref="/auth/login?returnTo=/dashboard"
+      />
 
-      {/* ── Header ──────────────────────────────────────────────────── */}
-      <header
-        className="sticky top-0 z-50 shrink-0"
-        style={{
-          background: 'rgba(255,255,255,0.82)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          borderBottom: '1px solid #e2e4ef',
-        }}
-      >
-        <div className="w-full px-5 h-14 flex items-center justify-between gap-3">
+      {/* ── Right content area ───────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col overflow-auto" style={{ background: '#f6f7fb' }}>
 
-          {/* Left — logo */}
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2.5 no-underline">
-              <div
-                className="w-8 h-8 rounded-[10px] flex items-center justify-center text-white text-[11px] font-bold shrink-0"
-                style={{
-                  background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)',
-                  fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace',
-                  boxShadow: '0 2px 8px rgba(59,108,255,0.28)',
-                }}
-              >
-                AG
-              </div>
-              <span className="font-bold text-[15px] text-[#1a1d2e]">AgentGate</span>
-            </Link>
-            <div className="w-px h-5 bg-[#e2e4ef]" />
-            <span className="text-[13px] text-[#9498b3] font-medium">Security Dashboard</span>
-          </div>
+        {/* ── Topbar ──────────────────────────────────────────────────── */}
+        <header
+          className="sticky top-0 z-40 shrink-0"
+          style={{
+            background: 'rgba(246,247,251,0.9)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderBottom: '1px solid #e2e4ef',
+          }}
+        >
+          <div className="w-full px-5 h-13 flex items-center justify-between gap-3" style={{ height: 52 }}>
 
-          {/* Center — status */}
-          <div className="flex items-center gap-2 flex-1 justify-center">
-            <div
-              className="flex items-center gap-2 rounded-full px-3 py-[5px]"
-              style={{ background: '#e7faf0', border: '1px solid #12b76a33' }}
-            >
-              <span className="w-[7px] h-[7px] rounded-full inline-block animate-pulse-dot" style={{ background: '#12b76a' }} />
-              <span
-                className="text-[11px] font-semibold text-[#12b76a]"
-                style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
-              >
-                {activeCount} agent{activeCount !== 1 ? 's' : ''} active
+            {/* Left — current section label */}
+            <div className="flex items-center gap-2">
+              <span className="text-[14px] font-bold text-[#1a1d2e]">
+                {tabs.find(t => t.id === activeTab)?.label ?? 'Overview'}
               </span>
             </div>
-            {demoMessage && (
-              <div
-                className="flex items-center gap-1.5 rounded-full px-3 py-[5px]"
-                style={{ background: '#ebf0ff', border: '1px solid #3b6cff33' }}
-              >
-                <span className="text-[11px] text-[#3b6cff] font-medium">{demoMessage}</span>
-              </div>
-            )}
-          </div>
 
-          {/* Right — actions */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={runDemo}
-              disabled={demoRunning}
-              className="flex items-center gap-2 px-4 py-[7px] rounded-[10px] text-white font-semibold text-[13px] border-none transition-all"
-              style={{
-                background: demoRunning
-                  ? 'linear-gradient(135deg, #5c6078, #9498b3)'
-                  : 'linear-gradient(135deg, #3b6cff, #6b8fff)',
-                boxShadow: demoRunning ? 'none' : '0 2px 8px rgba(59,108,255,0.28)',
-                cursor: demoRunning ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {demoRunning ? (
-                <>
-                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className="animate-spin shrink-0">
-                    <circle cx="6.5" cy="6.5" r="5.5" stroke="rgba(255,255,255,0.3)" strokeWidth="2"/>
-                    <path d="M6.5 1a5.5 5.5 0 0 1 5.5 5.5" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                  Running Demo…
-                </>
-              ) : (
-                <>
-                  <svg width="11" height="13" viewBox="0 0 11 13" fill="white" className="shrink-0">
-                    <path d="M0 0L11 6.5L0 13V0Z"/>
-                  </svg>
-                  Run Demo
-                </>
-              )}
-            </button>
-            {userName && (
-              <div
-                className="flex items-center gap-2 rounded-[10px] px-3 py-[5px]"
-                style={{ background: '#f0f1f7', border: '1px solid #e2e4ef' }}
-              >
+            {/* Center — status + demo message */}
+            <div className="flex items-center gap-2 flex-1 justify-center">
+              {demoMessage && (
                 <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)' }}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-[5px]"
+                  style={{ background: '#ebf0ff', border: '1px solid #3b6cff33' }}
                 >
-                  {userName.charAt(0).toUpperCase()}
+                  <span className="text-[11px] text-[#3b6cff] font-medium">{demoMessage}</span>
                 </div>
-                <span className="text-[13px] text-[#1a1d2e] font-medium max-w-[120px] truncate">{userName}</span>
-              </div>
-            )}
-            <Link
-              href={userName ? '/auth/logout' : '/auth/login?returnTo=/dashboard'}
-              className="px-4 py-[7px] rounded-[10px] text-[13px] font-semibold no-underline transition-colors"
-              style={userName
-                ? { background: '#fef2f2', color: '#ef4444', border: '1px solid #ef444420' }
-                : { background: 'linear-gradient(135deg, #3b6cff, #6b8fff)', color: '#fff', border: 'none', boxShadow: '0 2px 8px rgba(59,108,255,0.28)' }
-              }
-            >
-              {userName ? 'Log out' : 'Log in'}
-            </Link>
+              )}
+            </div>
+
+            {/* Right — Run Demo */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={runDemo}
+                disabled={demoRunning}
+                className="flex items-center gap-2 px-4 py-[7px] rounded-[10px] text-white font-semibold text-[13px] border-none transition-all"
+                style={{
+                  background: demoRunning
+                    ? 'linear-gradient(135deg, #5c6078, #9498b3)'
+                    : 'linear-gradient(135deg, #3b6cff, #6b8fff)',
+                  boxShadow: demoRunning ? 'none' : '0 2px 8px rgba(59,108,255,0.28)',
+                  cursor: demoRunning ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {demoRunning ? (
+                  <>
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className="animate-spin shrink-0">
+                      <circle cx="6.5" cy="6.5" r="5.5" stroke="rgba(255,255,255,0.3)" strokeWidth="2"/>
+                      <path d="M6.5 1a5.5 5.5 0 0 1 5.5 5.5" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    Running Demo…
+                  </>
+                ) : (
+                  <>
+                    <svg width="11" height="13" viewBox="0 0 11 13" fill="white" className="shrink-0">
+                      <path d="M0 0L11 6.5L0 13V0Z"/>
+                    </svg>
+                    Run Demo
+                  </>
+                )}
+              </button>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* ── Tab bar ─────────────────────────────────────────────────── */}
-      <TabBar tabs={tabs} activeId={activeTab} onChange={id => setActiveTab(id as typeof activeTab)} />
-
-      {/* ── Main content ─────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col gap-5 p-5">
+        {/* ── Main content ─────────────────────────────────────────────── */}
+        <div className="flex-1 flex flex-col gap-5 p-5">
 
         {/* ── KPI Cards (Overview only) ──────────────────────────────── */}
         {activeTab === 'overview' && (
@@ -550,6 +511,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        </div>
       </div>
     </div>
   );

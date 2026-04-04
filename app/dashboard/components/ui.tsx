@@ -168,6 +168,146 @@ export function KpiCard({
   );
 }
 
+// ─── DashboardSidebar ─────────────────────────────────────────────────────────
+export function DashboardSidebar({
+  tabs,
+  activeId,
+  onChange,
+  userName,
+  activeCount,
+  logoutHref,
+  loginHref,
+}: {
+  tabs: readonly TabConfig[];
+  activeId: string;
+  onChange: (id: string) => void;
+  userName: string | null;
+  activeCount: number;
+  logoutHref: string;
+  loginHref: string;
+}) {
+  return (
+    <aside
+      className="shrink-0 flex flex-col h-screen sticky top-0"
+      style={{ width: 220, background: '#0f1117', borderRight: '1px solid rgba(255,255,255,0.06)' }}
+    >
+      {/* Logo */}
+      <a
+        href="/"
+        className="flex items-center gap-2.5 no-underline px-4 py-4 shrink-0"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+      >
+        <div
+          className="w-8 h-8 rounded-[10px] flex items-center justify-center text-white text-[11px] font-extrabold shrink-0"
+          style={{
+            background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)',
+            fontFamily: 'IBM Plex Mono, monospace',
+            boxShadow: '0 2px 8px rgba(59,108,255,0.4)',
+          }}
+        >
+          AG
+        </div>
+        <div>
+          <div className="font-bold text-[14px] text-white leading-none">AgentGate</div>
+          <div className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: 'IBM Plex Mono, monospace' }}>Security Dashboard</div>
+        </div>
+      </a>
+
+      {/* Live status pill */}
+      <div className="px-4 py-3 shrink-0">
+        <div
+          className="flex items-center gap-2 rounded-[8px] px-3 py-[7px]"
+          style={{ background: 'rgba(18,183,106,0.1)', border: '1px solid rgba(18,183,106,0.2)' }}
+        >
+          <span className="w-[6px] h-[6px] rounded-full shrink-0 animate-pulse-dot" style={{ background: '#12b76a' }} />
+          <span className="text-[11px] font-semibold" style={{ color: '#12b76a', fontFamily: 'IBM Plex Mono, monospace' }}>
+            {activeCount} agent{activeCount !== 1 ? 's' : ''} active
+          </span>
+        </div>
+      </div>
+
+      {/* Nav label */}
+      <div className="px-4 pb-1.5 shrink-0">
+        <span className="text-[10px] font-bold uppercase tracking-[0.1em]" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: 'IBM Plex Mono, monospace' }}>
+          Navigation
+        </span>
+      </div>
+
+      {/* Nav items */}
+      <nav className="flex-1 flex flex-col gap-0.5 px-2 overflow-y-auto">
+        {tabs.map(tab => {
+          const isActive = activeId === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onChange(tab.id)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-left border-none cursor-pointer transition-all"
+              style={{
+                background: isActive ? `${tab.color}18` : 'transparent',
+                border: isActive ? `1px solid ${tab.color}28` : '1px solid transparent',
+              }}
+            >
+              <span
+                className="w-8 h-8 rounded-[8px] flex items-center justify-center text-base shrink-0 transition-all"
+                style={{ background: isActive ? `${tab.color}25` : 'rgba(255,255,255,0.05)' }}
+              >
+                {tab.icon}
+              </span>
+              <span
+                className="text-[13px] font-semibold flex-1 truncate"
+                style={{ color: isActive ? '#fff' : 'rgba(255,255,255,0.45)' }}
+              >
+                {tab.label}
+              </span>
+              {typeof tab.badge === 'number' && tab.badge > 0 && (
+                <span
+                  className="text-[10px] font-bold px-1.5 py-[1px] rounded-full shrink-0"
+                  style={{
+                    background: isActive ? `${tab.color}30` : 'rgba(255,255,255,0.08)',
+                    color: isActive ? tab.color : 'rgba(255,255,255,0.35)',
+                  }}
+                >
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Bottom — user + logout */}
+      <div className="shrink-0 px-2 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        {userName ? (
+          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-[10px]" style={{ background: 'rgba(255,255,255,0.04)' }}>
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+              style={{ background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)' }}
+            >
+              {userName.charAt(0).toUpperCase()}
+            </div>
+            <span className="text-[12px] font-medium flex-1 truncate" style={{ color: 'rgba(255,255,255,0.7)' }}>{userName}</span>
+            <a
+              href={logoutHref}
+              className="text-[10px] font-semibold px-2 py-1 rounded-[6px] no-underline shrink-0 transition-colors"
+              style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}
+            >
+              Out
+            </a>
+          </div>
+        ) : (
+          <a
+            href={loginHref}
+            className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-[10px] no-underline text-[13px] font-semibold transition-colors"
+            style={{ background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)', color: '#fff' }}
+          >
+            Log in
+          </a>
+        )}
+      </div>
+    </aside>
+  );
+}
+
 // ─── TabConfig & TabBar ───────────────────────────────────────────────────────
 export type TabConfig = {
   id: string;
