@@ -92,6 +92,7 @@ export function SectionHeader({
   title,
   subtitle,
   right,
+  accentColor,
 }: {
   icon: string;
   iconBgClass?: string;
@@ -99,9 +100,16 @@ export function SectionHeader({
   title: string;
   subtitle?: string;
   right?: React.ReactNode;
+  accentColor?: string;
 }) {
+  const bg = accentColor
+    ? `linear-gradient(135deg, ${accentColor}12 0%, #f6f7fb 100%)`
+    : undefined;
   return (
-    <div className="px-5 py-3.5 bg-[#f0f1f7] border-b border-[#e2e4ef] flex items-center justify-between shrink-0 rounded-t-[14px]">
+    <div
+      className="px-5 py-3.5 border-b border-[#e2e4ef] flex items-center justify-between shrink-0 rounded-t-[14px]"
+      style={{ background: bg ?? '#f0f1f7' }}
+    >
       <div className="flex items-center gap-2.5">
         <IconBox icon={icon} bgClass={iconBgClass} variant={iconVariant} />
         <div>
@@ -110,6 +118,108 @@ export function SectionHeader({
         </div>
       </div>
       {right && <div>{right}</div>}
+    </div>
+  );
+}
+
+// ─── KpiCard ──────────────────────────────────────────────────────────────────
+export function KpiCard({
+  label,
+  value,
+  sub,
+  icon,
+  color,
+  delay = '0s',
+}: {
+  label: string;
+  value: string | number;
+  sub: string;
+  icon: string;
+  color: string;
+  delay?: string;
+}) {
+  return (
+    <div
+      className="rounded-[14px] px-5 py-4 flex items-center gap-4 animate-fadeUp"
+      style={{
+        background: `linear-gradient(135deg, ${color}14 0%, #ffffff 100%)`,
+        border: `1px solid ${color}28`,
+        boxShadow: `0 2px 8px ${color}10`,
+        animationDelay: delay,
+      }}
+    >
+      <div
+        className="w-11 h-11 rounded-[12px] flex items-center justify-center text-xl shrink-0"
+        style={{ background: `${color}18`, border: `1px solid ${color}28` }}
+      >
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <div
+          className="text-[26px] font-extrabold leading-none tracking-[-0.03em]"
+          style={{ color }}
+        >
+          {value}
+        </div>
+        <div className="text-[12px] font-semibold text-[#1a1d2e] mt-1.5">{label}</div>
+        <div className="text-[10px] text-[#9498b3] mt-0.5 truncate">{sub}</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── TabConfig & TabBar ───────────────────────────────────────────────────────
+export type TabConfig = {
+  id: string;
+  label: string;
+  icon: string;
+  color: string;
+  badge?: number;
+};
+
+export function TabBar({
+  tabs,
+  activeId,
+  onChange,
+}: {
+  tabs: readonly TabConfig[];
+  activeId: string;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <div className="shrink-0 bg-white border-b border-[#e2e4ef] px-5">
+      <div className="flex items-center gap-0.5 overflow-x-auto">
+        {tabs.map(tab => {
+          const isActive = activeId === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onChange(tab.id)}
+              className="flex items-center gap-1.5 px-4 py-3 text-[13px] font-semibold bg-transparent cursor-pointer shrink-0 transition-colors border-0 outline-none"
+              style={{
+                color: isActive ? tab.color : '#9498b3',
+                borderBottom: `2px solid ${isActive ? tab.color : 'transparent'}`,
+                marginBottom: -1,
+              }}
+            >
+              <span className="text-[14px]">{tab.icon}</span>
+              <span>{tab.label}</span>
+              {typeof tab.badge === 'number' && tab.badge > 0 && (
+                <span
+                  className="text-[10px] font-bold px-1.5 py-[1px] rounded-full"
+                  style={{
+                    background: isActive ? `${tab.color}18` : '#f0f1f7',
+                    color: isActive ? tab.color : '#9498b3',
+                    border: isActive ? `1px solid ${tab.color}30` : '1px solid #e2e4ef',
+                  }}
+                >
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
