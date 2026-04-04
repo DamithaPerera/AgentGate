@@ -1,6 +1,6 @@
 {
   "name": "@damitha-perera/agentgate",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Authorization middleware SDK for AI agents — powered by AgentGate",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -33,7 +33,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DamithPerera/AgentGate"
+    "url": "git+https://github.com/DamithaPerera/AgentGate.git"
   },
   "homepage": "https://agent-gate-theta.vercel.app/docs",
   "files": [
