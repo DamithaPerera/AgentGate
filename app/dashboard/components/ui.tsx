@@ -168,6 +168,47 @@ export function KpiCard({
   );
 }
 
+// ─── MobileMenuButton ─────────────────────────────────────────────────────────
+export function MobileMenuButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label="Open navigation menu"
+      className="md:hidden flex items-center justify-center w-9 h-9 rounded-[10px] cursor-pointer shrink-0 border-none"
+      style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+    >
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+        <path d="M0 1h16M0 6h16M0 11h16" stroke="white" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    </button>
+  );
+}
+
+// ─── ResponsiveGrid ───────────────────────────────────────────────────────────
+export function ResponsiveGrid({
+  cols = 4,
+  children,
+  className = '',
+  gap = 4,
+}: {
+  cols?: 2 | 3 | 4;
+  children: React.ReactNode;
+  className?: string;
+  gap?: 4 | 5;
+}) {
+  const colClass: Record<number, string> = {
+    2: 'grid-cols-1 sm:grid-cols-2',
+    3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+    4: 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4',
+  };
+  const gapClass = gap === 5 ? 'gap-5' : 'gap-4';
+  return (
+    <div className={`grid ${colClass[cols]} ${gapClass} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
 // ─── DashboardSidebar ─────────────────────────────────────────────────────────
 export function DashboardSidebar({
   tabs,
@@ -177,6 +218,8 @@ export function DashboardSidebar({
   activeCount,
   logoutHref,
   loginHref,
+  isOpen = false,
+  onClose,
 }: {
   tabs: readonly TabConfig[];
   activeId: string;
@@ -185,10 +228,20 @@ export function DashboardSidebar({
   activeCount: number;
   logoutHref: string;
   loginHref: string;
+  isOpen?: boolean;
+  onClose?: () => void;
 }) {
   return (
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 md:hidden"
+          onClick={onClose}
+        />
+      )}
     <aside
-      className="shrink-0 flex flex-col h-screen sticky top-0"
+      className={`fixed inset-y-0 left-0 z-50 flex flex-col shrink-0 md:sticky md:top-0 md:h-screen md:translate-x-0 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       style={{ width: 220, background: '#0f1117', borderRight: '1px solid rgba(255,255,255,0.06)' }}
     >
       {/* Logo */}
@@ -240,7 +293,7 @@ export function DashboardSidebar({
           return (
             <button
               key={tab.id}
-              onClick={() => onChange(tab.id)}
+              onClick={() => { onChange(tab.id); onClose?.(); }}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-left border-none cursor-pointer transition-all"
               style={{
                 background: isActive ? `${tab.color}18` : 'transparent',
@@ -305,6 +358,7 @@ export function DashboardSidebar({
         )}
       </div>
     </aside>
+    </>
   );
 }
 

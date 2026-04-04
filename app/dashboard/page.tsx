@@ -9,7 +9,7 @@ import { useAgentEvents } from './hooks/useAgentEvents';
 import { useAgentRegistry } from './hooks/useAgentRegistry';
 import { useAuditTrail } from './hooks/useAuditTrail';
 import type { AgentEvent, PolicyRule } from '@/lib/types';
-import { StatusDot, KpiCard, DashboardSidebar, TabConfig, SectionHeader, LivePill } from './components/ui';
+import { StatusDot, KpiCard, DashboardSidebar, TabConfig, SectionHeader, LivePill, MobileMenuButton, ResponsiveGrid } from './components/ui';
 import { DecisionDonut } from './components/DecisionDonut';
 import { ActivitySparkline } from './components/ActivitySparkline';
 import { EventTypeBar } from './components/EventTypeBar';
@@ -71,6 +71,7 @@ export default function DashboardPage() {
   };
 
   const [activeTab, setActiveTab] = useState<'overview'|'agents'|'feed'|'audit'|'policy'|'keys'>('overview');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const activeCount = registry.agents.filter(a => a.status === 'active').length;
 
@@ -116,6 +117,8 @@ export default function DashboardPage() {
         activeCount={activeCount}
         logoutHref="/auth/logout"
         loginHref="/auth/login?returnTo=/dashboard"
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
 
       {/* ── Right content area ───────────────────────────────────────── */}
@@ -133,8 +136,9 @@ export default function DashboardPage() {
         >
           <div className="w-full px-5 h-13 flex items-center justify-between gap-3" style={{ height: 52 }}>
 
-            {/* Left — current section label */}
-            <div className="flex items-center gap-2">
+            {/* Left — hamburger (mobile) + section label */}
+            <div className="flex items-center gap-2.5">
+              <MobileMenuButton onClick={() => setSidebarOpen(true)} />
               <span className="text-[14px] font-bold text-[#1a1d2e]">
                 {tabs.find(t => t.id === activeTab)?.label ?? 'Overview'}
               </span>
@@ -192,7 +196,7 @@ export default function DashboardPage() {
 
         {/* ── KPI Cards (Overview only) ──────────────────────────────── */}
         {activeTab === 'overview' && (
-          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+          <ResponsiveGrid cols={4}>
             {kpis.map((kpi, i) => (
               <KpiCard
                 key={kpi.label}
@@ -204,12 +208,12 @@ export default function DashboardPage() {
                 delay={`${i * 0.05}s`}
               />
             ))}
-          </div>
+          </ResponsiveGrid>
         )}
 
         {/* ── Analytics Row (Overview only) ─────────────────────────── */}
         {activeTab === 'overview' && (
-        <div className="grid gap-5" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr' }}>
+        <ResponsiveGrid cols={4} gap={5}>
 
           {/* Chart: Total Events by Type */}
           <div className="bg-white rounded-[14px] px-5 py-4 animate-fadeUp"
@@ -242,7 +246,7 @@ export default function DashboardPage() {
               style={{ fontFamily: 'var(--font-ibm-plex-mono)' }}>Activity</span>
             <ActivitySparkline events={events} />
           </div>
-        </div>
+        </ResponsiveGrid>
 
         )}
 
@@ -267,13 +271,7 @@ export default function DashboardPage() {
         </div>}
 
         {/* ── 3-Panel Grid (Overview only) ──────────────────────────── */}
-        {activeTab === 'overview' && <div
-          className="animate-fadeUp grid gap-5"
-          style={{
-            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-            animationDelay: '0.08s',
-          }}
-        >
+        {activeTab === 'overview' && <ResponsiveGrid cols={3} gap={5} className="animate-fadeUp">
           {/* Panel 1 — Agent Registry */}
           <div
             className="bg-white rounded-[14px] flex flex-col overflow-hidden"
@@ -338,7 +336,7 @@ export default function DashboardPage() {
               <AuditTrail entries={audit.entries} onExport={audit.exportAudit} onVerify={audit.verifyChain} />
             </div>
           </div>
-        </div>}
+        </ResponsiveGrid>}
 
         {/* ── Full-width tab panels ──────────────────────────────────── */}
         {activeTab === 'agents' && (

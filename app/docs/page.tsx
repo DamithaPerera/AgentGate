@@ -1,156 +1,18 @@
 import Link from 'next/link';
 import { CopyButton } from './CopyButton';
+import { DocsSidebar } from './DocsSidebar';
+import { EndpointCard } from './EndpointCard';
+import type { Endpoint } from './EndpointCard';
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// ── Section data ───────────────────────────────────────────────────────────────
 
-type HttpMethod = 'GET' | 'POST' | 'DELETE';
-
-type Endpoint = {
-  method: HttpMethod;
-  path: string;
-  description: string;
-  authRequired: boolean;
-  authNote?: string;
-  requestBody?: string;
-  response: string;
-  curl: string;
-};
-
-type Section = { id: string; title: string; endpoints: Endpoint[] };
-
-// ── Design tokens ─────────────────────────────────────────────────────────────
-
-const METHOD_STYLES: Record<HttpMethod, string> = {
-  GET:    'bg-[#e7faf0] text-[#12b76a]',
-  POST:   'bg-[#ebf0ff] text-[#3b6cff]',
-  DELETE: 'bg-[#fef2f2] text-[#ef4444]',
-};
-
-// ── Reusable components ───────────────────────────────────────────────────────
-
-function MethodBadge({ method }: { method: HttpMethod }) {
-  return (
-    <span className={`inline-block px-2 py-0.5 rounded-[6px] text-[11px] font-bold tracking-[0.04em] font-[family-name:var(--font-ibm-plex-mono)] ${METHOD_STYLES[method]}`}>
-      {method}
-    </span>
-  );
-}
-
-function AuthBadge({ required, note }: { required: boolean; note?: string }) {
-  if (!required) return (
-    <span className="inline-block px-2 py-0.5 rounded-[6px] text-[11px] font-semibold bg-[#f6f7fb] text-[#9498b3] border border-[#e2e4ef]">
-      {note ?? 'No auth required'}
-    </span>
-  );
-  return (
-    <span className="inline-block px-2 py-0.5 rounded-[6px] text-[11px] font-semibold bg-[#ebf0ff] text-[#3b6cff] border border-[#3b6cff33]">
-      {note ? `Auth: ${note}` : 'Authorization: Bearer ag_live_...'}
-    </span>
-  );
-}
-
-function CodeBlock({ code, label, copyable = false }: { code: string; label: string; copyable?: boolean }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-bold text-[#9498b3] uppercase tracking-[0.06em] font-[family-name:var(--font-ibm-plex-mono)]">
-          {label}
-        </span>
-        {copyable && <CopyButton text={code} />}
-      </div>
-      <pre className="bg-[#1e2535] text-[#e2e8f0] font-[family-name:var(--font-ibm-plex-mono)] text-[12px] leading-[1.7] px-[18px] py-4 rounded-[10px] overflow-x-auto m-0 border border-[#2a3447]">
-        <code>{code}</code>
-      </pre>
-    </div>
-  );
-}
-
-function SectionHeading({ id, children }: { id: string; children: React.ReactNode }) {
-  return (
-    <h2 id={id} className="text-[22px] font-extrabold text-[#1a1d2e] mb-5 tracking-[-0.01em]">
-      {children}
-    </h2>
-  );
-}
-
-function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`bg-white border border-[#e2e4ef] rounded-[14px] overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,.04)] ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-function EndpointCard({ endpoint }: { endpoint: Endpoint }) {
-  return (
-    <Card>
-      {/* Header */}
-      <div className="px-5 py-4 border-b border-[#e2e4ef] bg-[#f6f7fb] flex flex-col gap-2.5">
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <MethodBadge method={endpoint.method} />
-          <code className="font-[family-name:var(--font-ibm-plex-mono)] text-[14px] font-semibold text-[#1a1d2e]">
-            {endpoint.path}
-          </code>
-        </div>
-        <p className="m-0 text-[13px] text-[#5c6078] leading-relaxed">{endpoint.description}</p>
-        <AuthBadge required={endpoint.authRequired} note={endpoint.authNote} />
-      </div>
-      {/* Body */}
-      <div className="p-5 flex flex-col gap-4">
-        {endpoint.requestBody && <CodeBlock label="Request Body" code={endpoint.requestBody} />}
-        <CodeBlock label="Response" code={endpoint.response} />
-        <CodeBlock label="cURL Example" code={endpoint.curl} copyable />
-      </div>
-    </Card>
-  );
-}
-
-function InfoCard({ variant, children }: { variant: 'blue' | 'purple' | 'yellow'; children: React.ReactNode }) {
-  const styles = {
-    blue:   'bg-[#ebf0ff] border-[#3b6cff33]',
-    purple: 'bg-[#f3f0ff] border-[#8b5cf633]',
-    yellow: 'bg-[#fffbeb] border-[#fde04733] text-[#92400e]',
-  };
-  return (
-    <div className={`border rounded-[12px] p-[18px_20px] text-[13px] leading-relaxed ${styles[variant]}`}>
-      {children}
-    </div>
-  );
-}
-
-function AuthMethodCard({ badge, badgeClass, title, children }: {
-  badge: string; badgeClass: string; title: string; children: React.ReactNode;
-}) {
-  return (
-    <div className="bg-white border border-[#e2e4ef] rounded-[12px] p-[18px_20px]">
-      <div className="flex items-center gap-2.5 mb-2.5">
-        <span className={`text-[11px] font-bold px-2 py-0.5 rounded-[6px] ${badgeClass}`}>{badge}</span>
-        <span className="text-[14px] font-semibold text-[#1a1d2e]">{title}</span>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function SidebarLink({ href, label, muted = false }: { href: string; label: string; muted?: boolean }) {
-  return (
-    <a
-      href={href}
-      className={`block text-[13px] px-2.5 py-[5px] rounded-[7px] no-underline transition-colors hover:bg-[#f0f1f7] ${
-        muted ? 'font-medium text-[#5c6078]' : 'font-semibold text-[#1a1d2e]'
-      }`}
-    >
-      {label}
-    </a>
-  );
-}
-
-// ── Data ──────────────────────────────────────────────────────────────────────
+type Section = { id: string; title: string; icon: string; endpoints: Endpoint[] };
 
 const sections: Section[] = [
   {
     id: 'agents',
     title: 'Agents',
+    icon: '🤖',
     endpoints: [
       {
         method: 'POST',
@@ -176,7 +38,7 @@ const sections: Section[] = [
   },
   "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 }`,
-        curl: `curl -X POST https://your-app.vercel.app/api/agents/register \\
+        curl: `curl -X POST https://agent-gate-theta.vercel.app/api/agents/register \\
   -H "Authorization: Bearer ag_live_..." \\
   -H "Content-Type: application/json" \\
   -d '{"name":"My Research Agent","framework":"crewai","capabilities":["github.read"],"trustLevel":2}'`,
@@ -198,7 +60,7 @@ const sections: Section[] = [
     }
   ]
 }`,
-        curl: `curl https://your-app.vercel.app/api/agents \\
+        curl: `curl https://agent-gate-theta.vercel.app/api/agents \\
   -H "Authorization: Bearer ag_live_..."`,
       },
       {
@@ -208,7 +70,7 @@ const sections: Section[] = [
         authRequired: true,
         requestBody: `{ "agentId": "agt_7x3k..." }`,
         response: `{ "success": true, "revokedTokens": 3, "agentId": "agt_7x3k..." }`,
-        curl: `curl -X POST https://your-app.vercel.app/api/revoke/agent \\
+        curl: `curl -X POST https://agent-gate-theta.vercel.app/api/revoke/agent \\
   -H "Authorization: Bearer ag_live_..." \\
   -H "Content-Type: application/json" \\
   -d '{"agentId":"agt_7x3k..."}'`,
@@ -220,7 +82,7 @@ const sections: Section[] = [
         authRequired: true,
         requestBody: `{ "service": "github" }`,
         response: `{ "success": true, "revokedAgents": 2, "service": "github" }`,
-        curl: `curl -X POST https://your-app.vercel.app/api/revoke/service \\
+        curl: `curl -X POST https://agent-gate-theta.vercel.app/api/revoke/service \\
   -H "Authorization: Bearer ag_live_..." \\
   -H "Content-Type: application/json" \\
   -d '{"service":"github"}'`,
@@ -231,7 +93,7 @@ const sections: Section[] = [
         description: 'Emergency: revoke ALL active agents immediately. Use with caution — this destroys every active agent token.',
         authRequired: true,
         response: `{ "success": true, "revokedAgents": 7, "revokedTokens": 24 }`,
-        curl: `curl -X POST https://your-app.vercel.app/api/revoke/panic \\
+        curl: `curl -X POST https://agent-gate-theta.vercel.app/api/revoke/panic \\
   -H "Authorization: Bearer ag_live_..."`,
       },
     ],
@@ -239,13 +101,14 @@ const sections: Section[] = [
   {
     id: 'authorization',
     title: 'Authorization',
+    icon: '⚡',
     endpoints: [
       {
         method: 'POST',
         path: '/api/authorize',
-        description: 'Request authorization for an agent action. The agent presents its JWT (obtained at registration), and AgentGate evaluates through all 5 gates: Identity → Intent → Policy → Consent → Token.',
+        description: 'Request authorization for an agent action. The agent presents its JWT (from /api/agents/register), and AgentGate evaluates through all 5 gates: Identity → Intent → Policy → Consent → Token.',
         authRequired: false,
-        authNote: 'Uses agent JWT (from /api/agents/register), not an API key.',
+        authNote: 'Agent JWT (from register), not an API key.',
         requestBody: `{
   "agentToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
   "action": {
@@ -269,7 +132,7 @@ const sections: Section[] = [
     "token": "issued"
   }
 }`,
-        curl: `curl -X POST https://your-app.vercel.app/api/authorize \\
+        curl: `curl -X POST https://agent-gate-theta.vercel.app/api/authorize \\
   -H "Content-Type: application/json" \\
   -d '{"agentToken":"eyJ...","action":{"type":"read","operation":"list_emails","service":"gmail"},"resource":{"type":"email"}}'`,
       },
@@ -278,6 +141,7 @@ const sections: Section[] = [
   {
     id: 'audit',
     title: 'Audit',
+    icon: '🔗',
     endpoints: [
       {
         method: 'GET',
@@ -300,7 +164,7 @@ const sections: Section[] = [
     }
   ]
 }`,
-        curl: `curl "https://your-app.vercel.app/api/audit?limit=50&offset=0" \\
+        curl: `curl "https://agent-gate-theta.vercel.app/api/audit?limit=50&offset=0" \\
   -H "Authorization: Bearer ag_live_..."`,
       },
       {
@@ -314,7 +178,7 @@ const sections: Section[] = [
   "firstEntry": "aud_001...",
   "lastEntry": "aud_042..."
 }`,
-        curl: `curl -X POST https://your-app.vercel.app/api/audit/verify \\
+        curl: `curl -X POST https://agent-gate-theta.vercel.app/api/audit/verify \\
   -H "Authorization: Bearer ag_live_..."`,
       },
       {
@@ -325,7 +189,7 @@ const sections: Section[] = [
         response: `// Returns: application/json file download
 // Content-Disposition: attachment; filename="audit-export-2025-04-01.json"
 [{ "id": "aud_x9k...", "timestamp": "...", ... }]`,
-        curl: `curl "https://your-app.vercel.app/api/audit/export" \\
+        curl: `curl "https://agent-gate-theta.vercel.app/api/audit/export" \\
   -H "Authorization: Bearer ag_live_..." \\
   -o audit-export.json`,
       },
@@ -334,6 +198,7 @@ const sections: Section[] = [
   {
     id: 'policy',
     title: 'Policy',
+    icon: '⚙️',
     endpoints: [
       {
         method: 'GET',
@@ -351,7 +216,7 @@ const sections: Section[] = [
     }
   ]
 }`,
-        curl: `curl https://your-app.vercel.app/api/policy/rules`,
+        curl: `curl https://agent-gate-theta.vercel.app/api/policy/rules`,
       },
       {
         method: 'POST',
@@ -371,7 +236,7 @@ const sections: Section[] = [
   ]
 }`,
         response: `{ "success": true, "count": 1 }`,
-        curl: `curl -X POST https://your-app.vercel.app/api/policy/rules \\
+        curl: `curl -X POST https://agent-gate-theta.vercel.app/api/policy/rules \\
   -H "Authorization: Bearer ag_live_..." \\
   -H "Content-Type: application/json" \\
   -d '{"rules":[...]}'`,
@@ -381,13 +246,14 @@ const sections: Section[] = [
   {
     id: 'keys',
     title: 'API Keys',
+    icon: '🔑',
     endpoints: [
       {
         method: 'GET',
         path: '/api/keys',
         description: 'List your API keys. Returns display-safe fields only — the raw key is never returned after creation.',
         authRequired: true,
-        authNote: 'Session (cookie) required.',
+        authNote: 'Session cookie required.',
         response: `{
   "keys": [
     {
@@ -400,7 +266,7 @@ const sections: Section[] = [
     }
   ]
 }`,
-        curl: `curl https://your-app.vercel.app/api/keys \\
+        curl: `curl https://agent-gate-theta.vercel.app/api/keys \\
   -H "Cookie: appSession=..."`,
       },
       {
@@ -408,7 +274,7 @@ const sections: Section[] = [
         path: '/api/keys',
         description: 'Generate a new API key. The raw key is returned exactly once — store it securely.',
         authRequired: true,
-        authNote: 'Session (cookie) required.',
+        authNote: 'Session cookie required.',
         requestBody: `{ "name": "Production Agent" }`,
         response: `{
   "id": "key_abc123...",
@@ -416,7 +282,7 @@ const sections: Section[] = [
   "key": "ag_live_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh",
   "keyPrefix": "ag_live_ABCD..."
 }`,
-        curl: `curl -X POST https://your-app.vercel.app/api/keys \\
+        curl: `curl -X POST https://agent-gate-theta.vercel.app/api/keys \\
   -H "Cookie: appSession=..." \\
   -H "Content-Type: application/json" \\
   -d '{"name":"Production Agent"}'`,
@@ -428,43 +294,148 @@ const sections: Section[] = [
         authRequired: true,
         authNote: 'Session required. You can only revoke your own keys.',
         response: `{ "success": true }`,
-        curl: `curl -X DELETE https://your-app.vercel.app/api/keys/key_abc123... \\
+        curl: `curl -X DELETE https://agent-gate-theta.vercel.app/api/keys/key_abc123... \\
   -H "Cookie: appSession=..."`,
       },
     ],
   },
 ];
 
+// ── Server-only components ─────────────────────────────────────────────────────
+
+function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-white border border-[#e2e4ef] rounded-[14px] overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.04)] ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+function InfoCard({
+  variant,
+  icon,
+  children,
+}: {
+  variant: 'blue' | 'purple' | 'yellow' | 'green';
+  icon?: string;
+  children: React.ReactNode;
+}) {
+  const styles = {
+    blue:   'bg-[#ebf0ff] border-[#3b6cff22] text-[#1e40af]',
+    purple: 'bg-[#f3f0ff] border-[#8b5cf622] text-[#5b21b6]',
+    yellow: 'bg-[#fffbeb] border-[#fde04730] text-[#92400e]',
+    green:  'bg-[#e7faf0] border-[#12b76a22] text-[#065f46]',
+  };
+  return (
+    <div className={`border rounded-[12px] p-4 text-[13px] leading-relaxed flex gap-3 ${styles[variant]}`}>
+      {icon && <span className="text-[18px] shrink-0 mt-0.5">{icon}</span>}
+      <div>{children}</div>
+    </div>
+  );
+}
+
+function SectionHeading({
+  id,
+  icon,
+  badge,
+  children,
+}: {
+  id: string;
+  icon?: string;
+  badge?: string | number;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-3 mb-6">
+      {icon && (
+        <div className="w-9 h-9 rounded-[10px] bg-[#f0f1f7] flex items-center justify-center text-[18px] shrink-0 border border-[#e2e4ef]">
+          {icon}
+        </div>
+      )}
+      <div className="flex items-center gap-2.5 flex-wrap">
+        <h2 id={id} className="text-[20px] font-extrabold text-[#1a1d2e] tracking-[-0.01em] m-0 leading-tight">
+          {children}
+        </h2>
+        {badge !== undefined && (
+          <span
+            className="text-[10px] font-bold px-2 py-[3px] rounded-full"
+            style={{
+              background: '#f0f1f7',
+              color: '#9498b3',
+              fontFamily: 'IBM Plex Mono, monospace',
+              border: '1px solid #e2e4ef',
+            }}
+          >
+            {badge} endpoint{Number(badge) !== 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Divider ────────────────────────────────────────────────────────────────────
+
+function SectionDivider() {
+  return <div className="border-t border-[#e2e4ef] mb-10" />;
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function DocsPage() {
-  return (
-    <main className="min-h-screen bg-[#f6f7fb]" style={{ fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif' }}>
+  const BASE_URL = 'https://agent-gate-theta.vercel.app';
 
-      {/* Nav */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-[#e2e4ef]">
-        <div className="max-w-[1280px] mx-auto px-6 h-[60px] flex items-center justify-between">
+  const gates = [
+    { label: 'Identity', color: '#3b6cff', bg: '#ebf0ff' },
+    { label: 'Intent',   color: '#8b5cf6', bg: '#f3f0ff' },
+    { label: 'Policy',   color: '#f97316', bg: '#fff7ed' },
+    { label: 'Consent',  color: '#f59e0b', bg: '#fffbeb' },
+    { label: 'Token',    color: '#12b76a', bg: '#e7faf0' },
+  ];
+
+  return (
+    <main
+      className="min-h-screen bg-[#f6f7fb]"
+      style={{ fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif' }}
+    >
+      {/* ── Nav ───────────────────────────────────────────────────────── */}
+      <nav className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-[#e2e4ef]">
+        <div className="max-w-[1300px] mx-auto px-4 md:px-6 h-[60px] flex items-center justify-between gap-3">
+
+          {/* Left */}
           <div className="flex items-center gap-2.5">
             <Link href="/" className="flex items-center gap-2 no-underline">
               <div
                 className="w-8 h-8 rounded-[8px] flex items-center justify-center text-white text-[11px] font-extrabold shrink-0"
                 style={{
                   background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)',
-                  fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace',
+                  fontFamily: 'IBM Plex Mono, monospace',
                   boxShadow: '0 2px 8px rgba(59,108,255,0.28)',
                 }}
               >AG</div>
               <span className="font-bold text-[15px] text-[#1a1d2e]">AgentGate</span>
             </Link>
             <div className="w-px h-[18px] bg-[#e2e4ef]" />
-            <span className="text-[13px] text-[#9498b3] font-medium">API Reference</span>
+            <span className="text-[13px] text-[#9498b3] font-medium hidden sm:inline">API Reference</span>
           </div>
+
+          {/* Right */}
           <div className="flex items-center gap-2">
-            <Link href="/docs" className="text-[13px] font-semibold text-[#3b6cff] no-underline">Docs</Link>
+            <a
+              href="https://github.com/DamithPerera/AgentGate"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-[6px] rounded-[8px] text-[13px] font-medium text-[#5c6078] no-underline border border-[#e2e4ef] bg-white hover:bg-[#f6f7fb] transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+              </svg>
+              GitHub
+            </a>
             <Link
               href="/dashboard"
               className="px-4 py-[7px] rounded-[8px] text-white font-semibold text-[13px] no-underline"
-              style={{ background: 'linear-gradient(135deg, #3b6cff, #6b8fff)', boxShadow: '0 2px 8px rgba(59,108,255,0.28)' }}
+              style={{ background: 'linear-gradient(135deg, #3b6cff, #6b8fff)', boxShadow: '0 2px 8px rgba(59,108,255,0.25)' }}
             >
               Dashboard
             </Link>
@@ -472,72 +443,128 @@ export default function DocsPage() {
         </div>
       </nav>
 
-      {/* Layout */}
-      <div className="max-w-[1280px] mx-auto flex gap-0 px-6">
+      {/* ── Layout ────────────────────────────────────────────────────── */}
+      <div className="max-w-[1300px] mx-auto flex px-0 md:px-6">
 
         {/* Sidebar */}
-        <aside className="w-[220px] shrink-0 sticky top-[60px] self-start h-[calc(100vh-60px)] overflow-y-auto py-8 pr-6">
-          <div className="flex flex-col gap-0.5">
-            <SidebarLink href="#introduction" label="Introduction" />
-            <SidebarLink href="#sdk" label="TypeScript SDK" />
-            <SidebarLink href="#authentication" label="Authentication" />
-            <div className="h-2" />
-            <span className="text-[10px] font-bold text-[#9498b3] uppercase tracking-[0.1em] px-2.5 py-0.5 font-[family-name:var(--font-ibm-plex-mono)]">
-              Endpoints
-            </span>
-            {sections.map(s => (
-              <SidebarLink key={s.id} href={`#${s.id}`} label={s.title} muted />
-            ))}
-          </div>
-        </aside>
+        <DocsSidebar />
 
         {/* Content */}
-        <div className="flex-1 min-w-0 py-10 pb-20 pl-10 border-l border-[#e2e4ef]">
+        <div className="flex-1 min-w-0 py-8 md:py-12 pb-24 px-4 md:pl-10 md:pr-0 md:border-l border-[#e2e4ef]">
 
-          {/* Introduction */}
+          {/* ── Introduction ──────────────────────────────────────────── */}
           <section id="introduction" className="mb-14">
-            <div className="inline-flex items-center gap-2 bg-[#ebf0ff] border border-[#3b6cff33] rounded-full px-3.5 py-[5px] mb-5">
+
+            {/* Version badge */}
+            <div className="inline-flex items-center gap-2 bg-[#ebf0ff] border border-[#3b6cff22] rounded-full px-3.5 py-[5px] mb-5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#3b6cff] inline-block" />
-              <span className="text-[#3b6cff] text-[12px] font-semibold">REST API · v1</span>
+              <span className="text-[#3b6cff] text-[12px] font-semibold" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
+                REST API · v1
+              </span>
             </div>
-            <h1 className="text-[32px] font-extrabold text-[#1a1d2e] mb-3.5 tracking-[-0.02em] leading-tight">
+
+            <h1 className="text-[30px] md:text-[36px] font-extrabold text-[#1a1d2e] mb-3.5 tracking-[-0.02em] leading-tight">
               AgentGate API Reference
             </h1>
-            <p className="text-[15px] text-[#5c6078] leading-[1.75] max-w-[680px] mb-5">
-              The AgentGate REST API lets you register AI agents, manage authorization policies,
-              inspect the tamper-evident audit trail, and programmatically revoke access — all from your own code.
+            <p className="text-[15px] text-[#5c6078] leading-[1.75] max-w-[640px] mb-6">
+              Register AI agents, evaluate authorization requests through a 5-gate pipeline,
+              inspect a tamper-evident audit trail, and programmatically revoke access — all from your own code.
             </p>
+
+            {/* Base URL */}
+            <div
+              className="rounded-[12px] mb-6 flex items-center justify-between gap-4 px-5 py-4"
+              style={{ background: '#0d1117', border: '1px solid #21262d' }}
+            >
+              <div>
+                <span
+                  className="text-[10px] font-bold text-[#6e7681] uppercase tracking-[0.1em] block mb-1"
+                  style={{ fontFamily: 'IBM Plex Mono, monospace' }}
+                >
+                  Base URL
+                </span>
+                <code
+                  className="text-[14px] font-semibold"
+                  style={{ color: '#58a6ff', fontFamily: 'IBM Plex Mono, monospace' }}
+                >
+                  {BASE_URL}
+                </code>
+              </div>
+              <CopyButton text={BASE_URL} />
+            </div>
+
+            {/* 5-gate pipeline */}
+            <div className="mb-6">
+              <p className="text-[12px] font-bold text-[#9498b3] uppercase tracking-[0.08em] mb-3" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
+                Authorization Pipeline
+              </p>
+              <div className="flex items-center gap-2 flex-wrap">
+                {gates.map((gate, i) => (
+                  <div key={gate.label} className="flex items-center gap-2">
+                    <span
+                      className="inline-flex items-center px-3 py-1.5 rounded-[8px] text-[12px] font-semibold"
+                      style={{ background: gate.bg, color: gate.color, border: `1px solid ${gate.color}22` }}
+                    >
+                      {gate.label}
+                    </span>
+                    {i < gates.length - 1 && (
+                      <span className="text-[#d0d3e2] text-[14px]">→</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Feature chips */}
             <div className="flex gap-2 flex-wrap">
-              {['JSON responses', 'Bearer token auth', 'HTTPS only', 'OpenAPI coming soon'].map(b => (
-                <span key={b} className="bg-white border border-[#e2e4ef] rounded-full px-3 py-[5px] text-[12px] font-medium text-[#5c6078]">
+              {['JSON responses', 'Bearer token auth', 'HTTPS only', 'SHA-256 audit chain', 'SPIFFE IDs'].map(b => (
+                <span
+                  key={b}
+                  className="bg-white border border-[#e2e4ef] rounded-full px-3 py-[5px] text-[12px] font-medium text-[#5c6078]"
+                >
                   {b}
                 </span>
               ))}
             </div>
           </section>
 
-          {/* SDK */}
+          <SectionDivider />
+
+          {/* ── TypeScript SDK ────────────────────────────────────────── */}
           <section id="sdk" className="mb-14">
-            <SectionHeading id="sdk-heading">TypeScript SDK</SectionHeading>
+            <SectionHeading id="sdk-heading" icon="📦">TypeScript SDK</SectionHeading>
             <p className="text-[14px] text-[#5c6078] leading-[1.75] mb-5">
-              The official SDK wraps the REST API — one import, one call. Full TypeScript types included.
+              The official SDK wraps the REST API — one import, one call. Full TypeScript types included, zero runtime dependencies.
             </p>
 
             {/* Install */}
-            <div className="mb-5">
-              <CodeBlock label="Install" code={`npm install @damitha-perera/agentgate`} copyable />
+            <div
+              className="rounded-[12px] mb-5 flex items-center justify-between gap-4 px-5 py-4"
+              style={{ background: '#0d1117', border: '1px solid #21262d' }}
+            >
+              <code className="text-[14px]" style={{ color: '#86efac', fontFamily: 'IBM Plex Mono, monospace' }}>
+                npm install @damitha-perera/agentgate
+              </code>
+              <CopyButton text="npm install @damitha-perera/agentgate" />
             </div>
 
             {/* Quick start */}
             <Card className="mb-5">
-              <div className="px-5 py-3.5 border-b border-[#e2e4ef] bg-[#f6f7fb]">
-                <span className="text-[12px] font-bold text-[#5c6078] uppercase tracking-[0.06em] font-[family-name:var(--font-ibm-plex-mono)]">Quick Start</span>
+              <div className="px-5 py-3.5 border-b border-[#e2e4ef] bg-[#f6f7fb] flex items-center justify-between">
+                <span className="text-[12px] font-bold text-[#5c6078] uppercase tracking-[0.06em]" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
+                  Quick Start
+                </span>
+                <span className="text-[11px] font-medium text-[#9498b3] bg-[#ebf0ff] text-[#3b6cff] px-2 py-0.5 rounded-[6px]" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
+                  TypeScript
+                </span>
               </div>
               <div className="p-5">
-                <CodeBlock label="TypeScript" copyable code={`import { AgentGate } from '@damitha-perera/agentgate';
+                <div className="relative">
+                  <div className="absolute top-3 right-3 z-10">
+                    <CopyButton text={`import { AgentGate } from '@damitha-perera/agentgate';
 
 const gate = new AgentGate({
-  baseUrl: 'https://agent-gate-theta.vercel.app',
+  baseUrl: '${BASE_URL}',
   apiKey: process.env.AGENTGATE_API_KEY!,
 });
 
@@ -558,104 +585,207 @@ const result = await gate.authorize({
 });
 
 if (!result.allowed) throw new Error(result.reason);
-
-// result.token.access_token — scoped, expires in 60s
 console.log(result.decision); // 'ALLOWED' | 'DENIED' | 'ESCALATED'`} />
+                  </div>
+                  <pre
+                    className="m-0 overflow-x-auto text-[12.5px] leading-[1.8] rounded-[10px]"
+                    style={{
+                      background: '#0d1117',
+                      color: '#e6edf3',
+                      padding: '16px 20px',
+                      paddingRight: 90,
+                      border: '1px solid #21262d',
+                      fontFamily: 'IBM Plex Mono, monospace',
+                    }}
+                  >{`import { AgentGate } from '@damitha-perera/agentgate';
+
+const gate = new AgentGate({
+  baseUrl: '${BASE_URL}',
+  apiKey: process.env.AGENTGATE_API_KEY!,
+});
+
+// 1. Register your agent once — store the token
+const agent = await gate.register({
+  name: 'my-crewai-agent',
+  framework: 'crewai',
+  capabilities: ['gmail.read', 'github.write'],
+  trustLevel: 1,
+});
+
+// 2. Authorize before every action
+const result = await gate.authorize({
+  agentToken: agent.token,
+  action: { type: 'read', operation: 'list_emails', service: 'gmail' },
+  resource: { type: 'email' },
+  context: { recipientExternal: false },
+});
+
+if (!result.allowed) throw new Error(result.reason);
+console.log(result.decision); // 'ALLOWED' | 'DENIED' | 'ESCALATED'`}</pre>
+                </div>
               </div>
             </Card>
 
-            {/* SDK methods table */}
+            {/* SDK methods */}
             <Card className="mb-5">
               <div className="px-5 py-3.5 border-b border-[#e2e4ef] bg-[#f6f7fb]">
-                <span className="text-[12px] font-bold text-[#5c6078] uppercase tracking-[0.06em] font-[family-name:var(--font-ibm-plex-mono)]">SDK Methods</span>
+                <span className="text-[12px] font-bold text-[#5c6078] uppercase tracking-[0.06em]" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
+                  SDK Methods
+                </span>
               </div>
-              <div className="divide-y divide-[#e2e4ef]">
+              <div className="divide-y divide-[#f0f1f7]">
                 {[
-                  { method: 'gate.register(opts)', returns: 'Promise<RegisteredAgent>', desc: 'Register a new agent, get identity token' },
-                  { method: 'gate.authorize(opts)', returns: 'Promise<AuthorizeResult>', desc: 'Run the 5-gate pipeline, get decision + scoped token' },
-                  { method: 'gate.revokeAgent(id)', returns: 'Promise<RevokeResult>', desc: 'Revoke a specific agent' },
-                  { method: 'gate.revokeService(svc)', returns: 'Promise<RevokeResult>', desc: 'Revoke all agents for a service' },
-                  { method: 'gate.panic()', returns: 'Promise<RevokeResult>', desc: 'Emergency — revoke all agents immediately' },
+                  { method: 'gate.register(opts)',    returns: 'Promise<RegisteredAgent>',  desc: 'Register a new agent, get identity token' },
+                  { method: 'gate.authorize(opts)',   returns: 'Promise<AuthorizeResult>',  desc: 'Run the 5-gate pipeline, get decision + scoped token' },
+                  { method: 'gate.revokeAgent(id)',   returns: 'Promise<RevokeResult>',     desc: 'Revoke a specific agent by ID' },
+                  { method: 'gate.revokeService(svc)',returns: 'Promise<RevokeResult>',     desc: 'Revoke all agents for a service' },
+                  { method: 'gate.panic()',            returns: 'Promise<RevokeResult>',     desc: 'Emergency — revoke all agents immediately' },
                 ].map(row => (
                   <div key={row.method} className="px-5 py-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-                    <code className="font-[family-name:var(--font-ibm-plex-mono)] text-[12px] text-[#3b6cff] shrink-0 whitespace-nowrap">{row.method}</code>
-                    <code className="font-[family-name:var(--font-ibm-plex-mono)] text-[11px] text-[#9498b3] shrink-0">{row.returns}</code>
+                    <code className="text-[12px] text-[#3b6cff] shrink-0 whitespace-nowrap" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>{row.method}</code>
+                    <code className="text-[11px] text-[#9498b3] shrink-0 hidden md:block" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>{row.returns}</code>
                     <span className="text-[13px] text-[#5c6078]">{row.desc}</span>
                   </div>
                 ))}
               </div>
             </Card>
 
-            <InfoCard variant="blue">
-              <strong className="text-[#1a1d2e]">npm package:</strong>{' '}
-              <a href="https://www.npmjs.com/package/@damitha-perera/agentgate" target="_blank" rel="noopener noreferrer" className="text-[#3b6cff] font-mono text-[12px]">
+            <InfoCard variant="blue" icon="📦">
+              <strong className="text-[#1e40af]">npm:</strong>{' '}
+              <a
+                href="https://www.npmjs.com/package/@damitha-perera/agentgate"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold underline"
+                style={{ fontFamily: 'IBM Plex Mono, monospace', fontSize: 12 }}
+              >
                 @damitha-perera/agentgate
               </a>
               {' '}— TypeScript types included, zero runtime dependencies, ESM + CJS.
             </InfoCard>
           </section>
 
-          {/* Authentication */}
+          <SectionDivider />
+
+          {/* ── Authentication ────────────────────────────────────────── */}
           <section id="authentication" className="mb-14">
-            <SectionHeading id="auth-heading">Authentication</SectionHeading>
+            <SectionHeading id="auth-heading" icon="🔐">Authentication</SectionHeading>
             <p className="text-[14px] text-[#5c6078] leading-[1.75] mb-5">
-              Most API endpoints require authentication. AgentGate supports two methods:
+              Most endpoints require authentication. AgentGate supports two methods:
             </p>
-            <div className="flex flex-col gap-3 mb-6">
-              <AuthMethodCard badge="API KEY" badgeClass="bg-[#ebf0ff] text-[#3b6cff]" title="For programmatic / agent access">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+              {/* API Key */}
+              <div className="bg-white border border-[#e2e4ef] rounded-[12px] p-5">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <span className="text-[11px] font-bold px-2.5 py-[3px] rounded-[6px] bg-[#ebf0ff] text-[#3b6cff]" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
+                    API KEY
+                  </span>
+                  <span className="text-[14px] font-semibold text-[#1a1d2e]">For agents &amp; automation</span>
+                </div>
                 <p className="text-[13px] text-[#5c6078] mb-3 leading-relaxed">
                   Generate an API key from the{' '}
-                  <Link href="/dashboard" className="text-[#3b6cff]">dashboard</Link> and include it in every request:
+                  <Link href="/dashboard" className="text-[#3b6cff] underline">dashboard</Link> and include it in every request:
                 </p>
-                <pre className="bg-[#1e2535] text-[#e2e8f0] font-[family-name:var(--font-ibm-plex-mono)] text-[12px] leading-relaxed px-4 py-3 rounded-[8px] m-0 border border-[#2a3447] overflow-x-auto">
-                  <code>Authorization: Bearer ag_live_ABCDEFGHIJKLMNOPQRSTUVWXYZabcde</code>
+                <pre
+                  className="m-0 overflow-x-auto text-[11.5px] rounded-[8px] p-3"
+                  style={{ background: '#0d1117', color: '#58a6ff', border: '1px solid #21262d', fontFamily: 'IBM Plex Mono, monospace' }}
+                >
+                  {`Authorization: Bearer ag_live_...`}
                 </pre>
-              </AuthMethodCard>
+              </div>
 
-              <AuthMethodCard badge="SESSION" badgeClass="bg-[#f3f0ff] text-[#8b5cf6]" title="For dashboard / browser access">
-                <p className="text-[13px] text-[#5c6078] leading-relaxed">
-                  Log in via <Link href="/auth/login" className="text-[#3b6cff]">Auth0</Link>.
-                  The session cookie is automatically sent from the dashboard.
+              {/* Session */}
+              <div className="bg-white border border-[#e2e4ef] rounded-[12px] p-5">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <span className="text-[11px] font-bold px-2.5 py-[3px] rounded-[6px] bg-[#f3f0ff] text-[#8b5cf6]" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
+                    SESSION
+                  </span>
+                  <span className="text-[14px] font-semibold text-[#1a1d2e]">For the dashboard</span>
+                </div>
+                <p className="text-[13px] text-[#5c6078] mb-3 leading-relaxed">
+                  Log in via{' '}
+                  <Link href="/auth/login" className="text-[#3b6cff] underline">Auth0</Link>.
+                  The session cookie is automatically sent by the browser from the dashboard UI.
                 </p>
-              </AuthMethodCard>
+                <pre
+                  className="m-0 overflow-x-auto text-[11.5px] rounded-[8px] p-3"
+                  style={{ background: '#0d1117', color: '#a5b4fc', border: '1px solid #21262d', fontFamily: 'IBM Plex Mono, monospace' }}
+                >
+                  {`Cookie: appSession=...`}
+                </pre>
+              </div>
             </div>
-            <InfoCard variant="yellow">
-              <strong>Important:</strong> API keys are shown exactly once when created.
-              Store them securely — they cannot be recovered. Revoke compromised keys immediately from the dashboard.
+
+            <InfoCard variant="yellow" icon="⚠️">
+              <strong>Important:</strong> API keys are shown exactly once at creation. Store them securely — they cannot be recovered.
+              Revoke compromised keys immediately from the{' '}
+              <Link href="/dashboard" className="underline font-medium">dashboard</Link>.
             </InfoCard>
           </section>
 
-          {/* Endpoint sections */}
-          {sections.map(section => (
+          <SectionDivider />
+
+          {/* ── Endpoint sections ─────────────────────────────────────── */}
+          {sections.map((section, si) => (
             <section key={section.id} id={section.id} className="mb-14">
-              <SectionHeading id={`${section.id}-heading`}>{section.title}</SectionHeading>
+              <SectionHeading
+                id={`${section.id}-heading`}
+                icon={section.icon}
+                badge={section.endpoints.length}
+              >
+                {section.title}
+              </SectionHeading>
+
               <div className="flex flex-col gap-5">
                 {section.endpoints.map((ep, i) => (
                   <EndpointCard key={i} endpoint={ep} />
                 ))}
               </div>
+
+              {si < sections.length - 1 && <div className="mt-10" />}
             </section>
           ))}
 
-          {/* Footer CTA */}
-          <Card className="p-6 flex items-center gap-4">
-            <div
-              className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white text-[12px] font-extrabold shrink-0"
-              style={{
-                background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)',
-                fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace',
-              }}
-            >AG</div>
-            <div>
-              <div className="text-[14px] font-semibold text-[#1a1d2e] mb-1">
-                Need help? Open the dashboard to explore live.
+          <SectionDivider />
+
+          {/* ── Footer CTA ────────────────────────────────────────────── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Card className="p-5 flex items-start gap-4">
+              <div className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white text-[12px] font-extrabold shrink-0" style={{ background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)', fontFamily: 'IBM Plex Mono, monospace' }}>
+                AG
               </div>
-              <div className="text-[13px] text-[#9498b3]">
-                Run the built-in demo to see agents register, authorize, and get revoked in real-time.{' '}
-                <Link href="/dashboard" className="text-[#3b6cff]">Open Dashboard →</Link>
+              <div>
+                <div className="text-[14px] font-semibold text-[#1a1d2e] mb-1">Try it live</div>
+                <div className="text-[13px] text-[#9498b3] mb-3">
+                  Run the built-in demo to see agents authorize and get revoked in real-time.
+                </div>
+                <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#3b6cff] no-underline">
+                  Open Dashboard →
+                </Link>
               </div>
-            </div>
-          </Card>
+            </Card>
+
+            <Card className="p-5 flex items-start gap-4">
+              <div className="w-10 h-10 rounded-[10px] bg-[#f6f7fb] flex items-center justify-center text-[20px] shrink-0 border border-[#e2e4ef]">
+                📦
+              </div>
+              <div>
+                <div className="text-[14px] font-semibold text-[#1a1d2e] mb-1">TypeScript SDK</div>
+                <div className="text-[13px] text-[#9498b3] mb-3">
+                  Zero dependencies. Full types. Works with CrewAI, LangGraph, AutoGen, and any HTTP client.
+                </div>
+                <a
+                  href="https://www.npmjs.com/package/@damitha-perera/agentgate"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#3b6cff] no-underline"
+                >
+                  View on npm →
+                </a>
+              </div>
+            </Card>
+          </div>
 
         </div>
       </div>
