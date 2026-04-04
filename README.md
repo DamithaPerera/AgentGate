@@ -4,7 +4,7 @@
 
 **Hackathon:** "Authorized to Act: Auth0 for AI Agents" · Devpost · Deadline April 7, 2026
 
-**Live Demo:** [agent-gate.vercel.app](https://agent-gate.vercel.app) &nbsp;·&nbsp; **API Docs:** [agent-gate.vercel.app/docs](https://agent-gate.vercel.app/docs)
+**Live Demo:** [agent-gate-theta.vercel.app](https://agent-gate-theta.vercel.app) &nbsp;·&nbsp; **API Docs:** [agent-gate-theta.vercel.app/docs](https://agent-gate-theta.vercel.app/docs)
 
 ---
 
@@ -109,7 +109,7 @@ Go to **Dashboard → API Keys**, click **Generate Key**, copy the key shown onc
 ### Step 2 — Register your agent
 
 ```bash
-curl -X POST https://agent-gate.vercel.app/api/agents/register \
+curl -X POST https://agent-gate-theta.vercel.app/api/agents/register \
   -H "Authorization: Bearer ag_live_YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -124,7 +124,7 @@ curl -X POST https://agent-gate.vercel.app/api/agents/register \
 ### Step 3 — Authorize an action
 
 ```bash
-curl -X POST https://agent-gate.vercel.app/api/authorize \
+curl -X POST https://agent-gate-theta.vercel.app/api/authorize \
   -H "Authorization: Bearer ag_live_YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -190,7 +190,7 @@ Programmatic access uses `ag_live_` prefixed API keys:
 The test agent covers 9 suites with 30+ scenarios:
 
 ```bash
-BASE_URL=https://agent-gate.vercel.app npm run test:agent
+BASE_URL=https://agent-gate-theta.vercel.app npm run test:agent
 ```
 
 | Suite | Description |
