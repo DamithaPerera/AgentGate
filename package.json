@@ -2,6 +2,7 @@
   "name": "agentgate",
   "version": "0.1.0",
   "private": true,
+  "author": "Damitha Perera",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
