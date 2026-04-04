@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ScrollToTop } from './ScrollToTop';
 
 export default function LandingPage() {
   return (
@@ -142,6 +143,72 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Framework integrations ──────────────────────────────── */}
+      <section style={{ background: '#fff', padding: '100px 24px', borderTop: '1px solid #E2E8F0' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 64 }}>
+            <div className="animate-fade-in-up" style={{ display: 'inline-block', background: '#F0FDF4', color: '#15803D', fontWeight: 600, fontSize: 13, padding: '4px 14px', borderRadius: 999, marginBottom: 16 }}>Framework Agnostic</div>
+            <h2 className="animate-fade-in-up delay-100" style={{ fontSize: 'clamp(24px, 3vw, 40px)', fontWeight: 800, color: '#0F172A', marginBottom: 12, letterSpacing: '-0.02em' }}>
+              One endpoint. Every agent framework.
+            </h2>
+            <p className="animate-fade-in-up delay-200" style={{ color: '#64748B', fontSize: 15, maxWidth: 480, margin: '0 auto' }}>
+              Any agent that can make an HTTP request works with AgentGate. No framework lock-in.
+            </p>
+          </div>
+
+          {/* Hub and spoke */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0, flexWrap: 'wrap', position: 'relative' }}>
+            {/* Left spokes */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-end' }}>
+              {[
+                { name: 'CrewAI', color: '#F59E0B', bg: '#FFFBEB', border: '#FDE68A', icon: '🤖' },
+                { name: 'LangGraph', color: '#3B82F6', bg: '#EFF6FF', border: '#BFDBFE', icon: '🔗' },
+                { name: 'AutoGPT', color: '#8B5CF6', bg: '#F5F3FF', border: '#DDD6FE', icon: '⚡' },
+              ].map(f => (
+                <div key={f.name} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ background: f.bg, border: `1px solid ${f.border}`, borderRadius: 12, padding: '10px 18px', display: 'flex', alignItems: 'center', gap: 8, minWidth: 140 }}>
+                    <span style={{ fontSize: 18 }}>{f.icon}</span>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: f.color }}>{f.name}</span>
+                  </div>
+                  <div style={{ width: 40, height: 1, background: 'linear-gradient(to right, #CBD5E1, #3b6cff44)' }} />
+                </div>
+              ))}
+            </div>
+
+            {/* Center hub */}
+            <div style={{ width: 120, height: 120, borderRadius: '50%', background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(59,108,255,0.35)', zIndex: 1, flexShrink: 0, margin: '0 8px' }}>
+              <span style={{ color: '#fff', fontWeight: 900, fontSize: 18, fontFamily: 'IBM Plex Mono, monospace', letterSpacing: '-0.02em' }}>AG</span>
+              <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: 600, marginTop: 2 }}>AgentGate</span>
+            </div>
+
+            {/* Right spokes */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-start' }}>
+              {[
+                { name: 'MCP', color: '#10B981', bg: '#ECFDF5', border: '#A7F3D0', icon: '🔌' },
+                { name: 'Custom Python', color: '#EF4444', bg: '#FEF2F2', border: '#FECACA', icon: '🐍' },
+                { name: 'Any HTTP Agent', color: '#6B7280', bg: '#F9FAFB', border: '#E5E7EB', icon: '🌐' },
+              ].map(f => (
+                <div key={f.name} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 40, height: 1, background: 'linear-gradient(to right, #3b6cff44, #CBD5E1)' }} />
+                  <div style={{ background: f.bg, border: `1px solid ${f.border}`, borderRadius: 12, padding: '10px 18px', display: 'flex', alignItems: 'center', gap: 8, minWidth: 140 }}>
+                    <span style={{ fontSize: 18 }}>{f.icon}</span>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: f.color }}>{f.name}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom stat */}
+          <p style={{ textAlign: 'center', marginTop: 48, color: '#94A3B8', fontSize: 14 }}>
+            All frameworks use the same single endpoint —{' '}
+            <code style={{ background: '#F1F5F9', padding: '2px 8px', borderRadius: 6, fontSize: 13, color: '#3b6cff', fontFamily: 'IBM Plex Mono, monospace' }}>
+              POST /api/authorize
+            </code>
+          </p>
+        </div>
+      </section>
+
       {/* ── Standards — light section ────────────────────────────── */}
       <section style={{ background: '#F8FAFC', padding: '80px 24px', borderTop: '1px solid #E2E8F0' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
@@ -228,6 +295,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      <ScrollToTop />
 
       {/* ── Footer ──────────────────────────────────────────────── */}
       <footer style={{ background: '#060D1A', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '40px 24px', textAlign: 'center' }}>

@@ -71,12 +71,37 @@ export default function DashboardPage() {
     }
   };
 
+  const [activeTab, setActiveTab] = useState<'overview'|'agents'|'feed'|'audit'|'policy'|'keys'>('overview');
+
   const activeCount = registry.agents.filter(a => a.status === 'active').length;
 
   const services = ['github', 'gmail', 'calendar'];
   const activeAgents = registry.agents.filter(a => a.status === 'active');
   const hasService = (s: string) => activeAgents.some(a => a.capabilities.some(c => c.startsWith(s + '.')));
   const serviceLabel = (s: string) => s === 'gmail' ? 'Google (Gmail)' : s.charAt(0).toUpperCase() + s.slice(1);
+
+  // KPI computations
+  const today = new Date().toDateString();
+  const decisionsToday = audit.entries.filter(e => new Date(e.timestamp).toDateString() === today).length;
+  const allowedCount = audit.entries.filter(e => e.decision === 'ALLOWED').length;
+  const allowRate = audit.entries.length > 0 ? Math.round((allowedCount / audit.entries.length) * 100) : 0;
+  const activePolicies = rules.filter(r => r.enabled).length;
+
+  const kpis = [
+    { label: 'Active Agents',    value: activeCount,      sub: `of ${registry.agents.length} registered`, color: '#12b76a', bg: '#e7faf0', icon: '🤖' },
+    { label: 'Decisions Today',  value: decisionsToday,   sub: `${audit.entries.length} total`,            color: '#3b6cff', bg: '#ebf0ff', icon: '⚡' },
+    { label: 'Allow Rate',       value: `${allowRate}%`,  sub: `${allowedCount} allowed`,                  color: '#8b5cf6', bg: '#f3f0ff', icon: '✅' },
+    { label: 'Active Policies',  value: activePolicies,   sub: `${rules.length} total rules`,              color: '#f59e0b', bg: '#fffbeb', icon: '⚖️' },
+  ];
+
+  const tabs = [
+    { id: 'overview', label: 'Overview',  icon: '📊' },
+    { id: 'agents',   label: 'Agents',    icon: '🤖', badge: activeCount },
+    { id: 'feed',     label: 'Live Feed', icon: '⚡', badge: events.length },
+    { id: 'audit',    label: 'Audit',     icon: '🔗', badge: audit.entries.length },
+    { id: 'policy',   label: 'Policy',    icon: '⚙️', badge: activePolicies },
+    { id: 'keys',     label: 'API Keys',  icon: '🔑' },
+  ] as const;
 
   return (
     <div
@@ -198,10 +223,75 @@ export default function DashboardPage() {
         </div>
       </header>
 
+      {/* ── Tab bar ─────────────────────────────────────────────────── */}
+      <div className="shrink-0 bg-white border-b border-[#e2e4ef] px-5">
+        <div className="flex items-center gap-1 overflow-x-auto">
+          {tabs.map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className="flex items-center gap-1.5 px-4 py-3 text-[13px] font-semibold border-none bg-transparent cursor-pointer shrink-0 border-b-2 transition-colors"
+                style={{
+                  color: isActive ? '#3b6cff' : '#9498b3',
+                  borderBottomColor: isActive ? '#3b6cff' : 'transparent',
+                  borderBottomWidth: 2,
+                  borderBottomStyle: 'solid',
+                  marginBottom: -1,
+                }}
+              >
+                <span>{tab.icon}</span>
+                <span>{tab.label}</span>
+                {'badge' in tab && (tab.badge as number) > 0 && (
+                  <span
+                    className="text-[10px] font-bold px-1.5 py-[1px] rounded-full"
+                    style={{
+                      background: isActive ? '#ebf0ff' : '#f0f1f7',
+                      color: isActive ? '#3b6cff' : '#9498b3',
+                    }}
+                  >
+                    {tab.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* ── Main content ─────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col gap-5 p-5">
 
-        {/* ── Analytics Row ─────────────────────────────────────────── */}
+        {/* ── KPI Cards (Overview only) ──────────────────────────────── */}
+        {activeTab === 'overview' && (
+          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+            {kpis.map((kpi, i) => (
+              <div
+                key={kpi.label}
+                className="bg-white rounded-[14px] px-5 py-4 flex items-center gap-4 animate-fadeUp"
+                style={{ border: '1px solid #e2e4ef', boxShadow: '0 1px 3px rgba(0,0,0,.04)', animationDelay: `${i * 0.05}s` }}
+              >
+                <div
+                  className="w-10 h-10 rounded-[10px] flex items-center justify-center text-xl shrink-0"
+                  style={{ background: kpi.bg }}
+                >
+                  {kpi.icon}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[22px] font-extrabold leading-none tracking-[-0.02em]" style={{ color: kpi.color }}>
+                    {kpi.value}
+                  </div>
+                  <div className="text-[11px] font-semibold text-[#1a1d2e] mt-1">{kpi.label}</div>
+                  <div className="text-[10px] text-[#9498b3] mt-0.5 truncate">{kpi.sub}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── Analytics Row (Overview only) ─────────────────────────── */}
+        {activeTab === 'overview' && (
         <div className="grid gap-5" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr' }}>
 
           {/* Chart: Total Events by Type */}
@@ -237,8 +327,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* ── Policy Engine card ─────────────────────────────────────── */}
-        <div
+        )}
+
+        {/* ── Policy Engine card (Overview only) ─────────────────────── */}
+        {activeTab === 'overview' && <div
           className="animate-fadeUp bg-white rounded-[14px] overflow-hidden"
           style={{
             border: '1px solid #e2e4ef',
@@ -268,10 +360,10 @@ export default function DashboardPage() {
           <div className="px-5 py-4">
             <PolicyEditor rules={rules} onRulesChange={setRules} />
           </div>
-        </div>
+        </div>}
 
-        {/* ── 3-Panel Grid ──────────────────────────────────────────── */}
-        <div
+        {/* ── 3-Panel Grid (Overview only) ──────────────────────────── */}
+        {activeTab === 'overview' && <div
           className="animate-fadeUp grid gap-5"
           style={{
             gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
@@ -364,7 +456,6 @@ export default function DashboardPage() {
               minHeight: '420px',
             }}
           >
-            {/* Panel header */}
             <div className="flex items-center justify-between px-5 py-3.5 bg-[#f0f1f7] border-b border-[#e2e4ef] rounded-t-[14px] shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="w-[30px] h-[30px] rounded-[8px] bg-[#f3f0ff] flex items-center justify-center text-sm shrink-0">🔗</div>
@@ -373,36 +464,107 @@ export default function DashboardPage() {
                   <div className="text-[11px] text-[#9498b3] mt-px">{audit.entries.length} entries · SHA-256 chain</div>
                 </div>
               </div>
-              <div
-                className="flex items-center gap-1.5 rounded-full px-2.5 py-[4px]"
-                style={{ background: '#f3f0ff', border: '1px solid #8b5cf633' }}
-              >
-                <span
-                  className="text-[10px] font-semibold text-[#8b5cf6]"
-                  style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
-                >
-                  tamper-evident
-                </span>
+              <div className="flex items-center gap-1.5 rounded-full px-2.5 py-[4px]" style={{ background: '#f3f0ff', border: '1px solid #8b5cf633' }}>
+                <span className="text-[10px] font-semibold text-[#8b5cf6]" style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}>tamper-evident</span>
               </div>
             </div>
-            {/* Panel body */}
             <div className="flex-1 overflow-hidden">
-              <AuditTrail
-                entries={audit.entries}
-                onExport={audit.exportAudit}
-                onVerify={audit.verifyChain}
-              />
+              <AuditTrail entries={audit.entries} onExport={audit.exportAudit} onVerify={audit.verifyChain} />
             </div>
           </div>
-        </div>
+        </div>}
 
-        {/* ── API Keys ──────────────────────────────────────────────── */}
-        <div className="animate-fadeUp" style={{ animationDelay: '0.24s' }}>
-          <ApiKeys />
-        </div>
+        {/* ── Full-width tab panels ──────────────────────────────────── */}
+        {activeTab === 'agents' && (
+          <div className="bg-white rounded-[14px] flex flex-col overflow-hidden animate-fadeUp" style={{ border: '1px solid #e2e4ef', boxShadow: '0 1px 3px rgba(0,0,0,.04)', minHeight: 500 }}>
+            <div className="flex items-center justify-between px-5 py-3.5 bg-[#f0f1f7] border-b border-[#e2e4ef] shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-[30px] h-[30px] rounded-[8px] bg-[#ebf0ff] flex items-center justify-center text-sm shrink-0">🤖</div>
+                <div>
+                  <div className="font-semibold text-[13px] text-[#1a1d2e]">Agent Registry</div>
+                  <div className="text-[11px] text-[#9498b3] mt-px">{activeCount} of {registry.agents.length} active</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 rounded-full px-2.5 py-[4px]" style={{ background: '#e7faf0', border: '1px solid #12b76a33' }}>
+                <span className="w-[6px] h-[6px] rounded-full inline-block animate-pulse-dot" style={{ background: '#12b76a' }} />
+                <span className="text-[10px] font-semibold text-[#12b76a]" style={{ fontFamily: 'var(--font-ibm-plex-mono)' }}>LIVE</span>
+              </div>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <AgentRegistry agents={registry.agents} onRevoke={registry.revokeAgent} />
+            </div>
+          </div>
+        )}
 
-        {/* ── Bottom bar ──────────────────────────────────────────────── */}
-        <div
+        {activeTab === 'feed' && (
+          <div className="bg-white rounded-[14px] flex flex-col overflow-hidden animate-fadeUp" style={{ border: '1px solid #e2e4ef', boxShadow: '0 1px 3px rgba(0,0,0,.04)', minHeight: 500 }}>
+            <div className="flex items-center justify-between px-5 py-3.5 bg-[#f0f1f7] border-b border-[#e2e4ef] shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-[30px] h-[30px] rounded-[8px] bg-[#fefce8] flex items-center justify-center text-sm shrink-0">⚡</div>
+                <div>
+                  <div className="font-semibold text-[13px] text-[#1a1d2e]">Live Feed</div>
+                  <div className="text-[11px] text-[#9498b3] mt-px">{events.length} events · Real-time authorization stream</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 rounded-full px-2.5 py-[4px]" style={{ background: '#ebf0ff', border: '1px solid #3b6cff33' }}>
+                <span className="w-[6px] h-[6px] rounded-full inline-block animate-pulse-dot" style={{ background: '#3b6cff' }} />
+                <span className="text-[10px] font-semibold text-[#3b6cff]" style={{ fontFamily: 'var(--font-ibm-plex-mono)' }}>SSE</span>
+              </div>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <LiveFeed events={events} isLoggedIn={!!userName} />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'audit' && (
+          <div className="bg-white rounded-[14px] flex flex-col overflow-hidden animate-fadeUp" style={{ border: '1px solid #e2e4ef', boxShadow: '0 1px 3px rgba(0,0,0,.04)', minHeight: 500 }}>
+            <div className="flex items-center justify-between px-5 py-3.5 bg-[#f0f1f7] border-b border-[#e2e4ef] shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-[30px] h-[30px] rounded-[8px] bg-[#f3f0ff] flex items-center justify-center text-sm shrink-0">🔗</div>
+                <div>
+                  <div className="font-semibold text-[13px] text-[#1a1d2e]">Audit Trail</div>
+                  <div className="text-[11px] text-[#9498b3] mt-px">{audit.entries.length} entries · SHA-256 hash chain</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 rounded-full px-2.5 py-[4px]" style={{ background: '#f3f0ff', border: '1px solid #8b5cf633' }}>
+                <span className="text-[10px] font-semibold text-[#8b5cf6]" style={{ fontFamily: 'var(--font-ibm-plex-mono)' }}>tamper-evident</span>
+              </div>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <AuditTrail entries={audit.entries} onExport={audit.exportAudit} onVerify={audit.verifyChain} />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'policy' && (
+          <div className="bg-white rounded-[14px] overflow-hidden animate-fadeUp" style={{ border: '1px solid #e2e4ef', boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+            <div className="flex items-center justify-between px-5 py-3.5 bg-[#f0f1f7] border-b border-[#e2e4ef]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-[30px] h-[30px] rounded-[8px] bg-[#ebf0ff] flex items-center justify-center text-sm shrink-0">⚙️</div>
+                <div>
+                  <div className="font-semibold text-[13px] text-[#1a1d2e]">Policy Engine</div>
+                  <div className="text-[11px] text-[#9498b3] mt-px">{activePolicies} active rules · OPA-style evaluation</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 rounded-full px-2.5 py-[4px]" style={{ background: '#ebf0ff', border: '1px solid #3b6cff33' }}>
+                <span className="text-[10px] font-semibold text-[#3b6cff]" style={{ fontFamily: 'var(--font-ibm-plex-mono)' }}>{rules.length} rules</span>
+              </div>
+            </div>
+            <div className="px-5 py-4">
+              <PolicyEditor rules={rules} onRulesChange={setRules} />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'keys' && (
+          <div className="animate-fadeUp">
+            <ApiKeys />
+          </div>
+        )}
+
+        {/* ── Bottom bar (Overview only) ──────────────────────────────── */}
+        {activeTab === 'overview' && <div
           className="animate-fadeUp bg-white rounded-[14px]"
           style={{
             border: '1px solid #e2e4ef',
@@ -483,7 +645,7 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
-        </div>
+        </div>}
 
         {/* ── Footer ──────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-1 pb-2">
