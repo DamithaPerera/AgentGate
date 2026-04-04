@@ -35,15 +35,7 @@ function extractBearer(req: NextRequest): string | null {
 
 // Resolve auth from either Auth0 session or API key
 export async function resolveAuth(req: NextRequest): Promise<AuthContext | null> {
-  // 1. Try Auth0 session first
-  try {
-    const session = await auth0.getSession();
-    if (session?.user?.sub) {
-      return { userId: session.user.sub, source: 'session' };
-    }
-  } catch {}
-
-  // 2. Try API key from Authorization header
+  // 1. Check for Bearer API key FIRST — avoids Auth0 session redirects on API routes
   const raw = extractBearer(req);
   if (raw && raw.startsWith('ag_live_')) {
     const hash = hashKey(raw);
@@ -55,7 +47,7 @@ export async function resolveAuth(req: NextRequest): Promise<AuthContext | null>
         .limit(1);
 
       if (rows.length && rows[0].isActive && !rows[0].revokedAt) {
-        // Update last used
+        // Update last used timestamp
         await db()
           .update(apiKeys)
           .set({ lastUsedAt: new Date().toISOString() })
@@ -65,6 +57,14 @@ export async function resolveAuth(req: NextRequest): Promise<AuthContext | null>
       }
     } catch {}
   }
+
+  // 2. Fall back to Auth0 session (dashboard users)
+  try {
+    const session = await auth0.getSession();
+    if (session?.user?.sub) {
+      return { userId: session.user.sub, source: 'session' };
+    }
+  } catch {}
 
   return null;
 }
