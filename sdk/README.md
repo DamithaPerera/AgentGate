@@ -5,13 +5,13 @@
 One import. One call. Every AI agent action authorized through a 5-gate security pipeline.
 
 ```bash
-npm install agentgate
+npm install @damitha-perera/agentgate
 ```
 
 ## Quick Start
 
 ```ts
-import { AgentGate } from 'agentgate';
+import { AgentGate } from '@damitha-perera/agentgate';
 
 const gate = new AgentGate({
   baseUrl: 'https://agent-gate-theta.vercel.app',
@@ -124,7 +124,7 @@ Emergency: revoke ALL agents immediately.
 ## LangGraph Example
 
 ```ts
-import { AgentGate } from 'agentgate';
+import { AgentGate } from '@damitha-perera/agentgate';
 import { StateGraph } from '@langchain/langgraph';
 
 const gate = new AgentGate({ apiKey: process.env.AGENTGATE_API_KEY! });

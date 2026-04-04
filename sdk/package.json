@@ -1,5 +1,5 @@
 {
-  "name": "agentgate",
+  "name": "@damitha-perera/agentgate",
   "version": "0.1.0",
   "description": "Authorization middleware SDK for AI agents — powered by AgentGate",
   "main": "dist/index.js",
