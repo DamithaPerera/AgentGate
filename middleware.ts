@@ -7,6 +7,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+    // Run Auth0 middleware on all routes EXCEPT static files and API routes
+    // API routes handle their own auth via Bearer token (withAuth / resolveAuth)
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|api/).*)',
   ],
 };

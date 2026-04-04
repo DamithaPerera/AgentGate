@@ -13,8 +13,9 @@
  * Run: npm run test:agent
  */
 
-const BASE = process.env.AGENTGATE_URL ?? 'http://localhost:3000';
-const GAP  = 1200; // ms between requests (keeps dashboard readable)
+const BASE    = process.env.AGENTGATE_URL ?? 'http://localhost:3000';
+const API_KEY = process.env.AGENTGATE_API_KEY ?? '';
+const GAP     = 1200; // ms between requests (keeps dashboard readable)
 
 // ── ANSI colours ─────────────────────────────────────────────────────────────
 const C = {
@@ -56,22 +57,42 @@ function result(decision: string, reason: string, expected: string, gates?: Reco
 }
 
 // ── HTTP helpers ──────────────────────────────────────────────────────────────
+function authHeaders(): Record<string, string> {
+  const h: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (API_KEY) h['Authorization'] = `Bearer ${API_KEY}`;
+  return h;
+}
+
 async function post(path: string, body: unknown) {
   const res = await fetch(`${BASE}${path}`, {
     method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders(),
     body:    JSON.stringify(body),
   });
-  return { status: res.status, data: await res.json() as Record<string, unknown> };
+  const text = await res.text();
+  let data: Record<string, unknown>;
+  try {
+    data = JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    data = { error: `Non-JSON response (${res.status})`, body: text.slice(0, 200) };
+  }
+  return { status: res.status, data };
 }
 
 async function del(path: string, body: unknown) {
   const res = await fetch(`${BASE}${path}`, {
     method:  'DELETE',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders(),
     body:    JSON.stringify(body),
   });
-  return { status: res.status, data: await res.json() as Record<string, unknown> };
+  const text = await res.text();
+  let data: Record<string, unknown>;
+  try {
+    data = JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    data = { error: `Non-JSON response (${res.status})`, body: text.slice(0, 200) };
+  }
+  return { status: res.status, data };
 }
 
 // ── Register helper ───────────────────────────────────────────────────────────
@@ -117,9 +138,14 @@ async function authorize(opts: {
 async function main() {
   console.clear();
   console.log(`\n${C.bold}${C.cyan}  AgentGate — Full Test Suite${C.reset}`);
-  console.log(`  Target : ${BASE}`);
+  console.log(`  Target    : ${BASE}`);
+  console.log(`  API Key   : ${API_KEY ? `${API_KEY.slice(0, 12)}…` : `${C.red}NOT SET — set AGENTGATE_API_KEY${C.reset}`}`);
   console.log(`  Dashboard → ${BASE}/dashboard\n`);
   console.log(`  ${C.grey}Watch the dashboard as each scenario fires.${C.reset}\n`);
+  if (!API_KEY) {
+    console.log(`${C.red}  ⚠  No API key set. Registration will fail.`);
+    console.log(`     Generate one at ${BASE}/dashboard then set AGENTGATE_API_KEY.${C.reset}\n`);
+  }
 
   // ── SUITE A: Identity Gate ─────────────────────────────────────────────────
   banner('Suite A — Gate 1: Identity');
