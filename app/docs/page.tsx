@@ -423,7 +423,7 @@ export default function DocsPage() {
           {/* Right */}
           <div className="flex items-center gap-2">
             <a
-              href="https://github.com/DamithPerera/AgentGate"
+              href="https://github.com/DamithaPerera/AgentGate"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:flex items-center gap-1.5 px-3 py-[6px] rounded-[8px] text-[13px] font-medium text-[#5c6078] no-underline border border-[#e2e4ef] bg-white hover:bg-[#f6f7fb] transition-colors"
