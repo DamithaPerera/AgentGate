@@ -348,17 +348,50 @@ export function ApiKeys() {
           </div>
         )}
 
-        {/* Usage hint */}
+        {/* SDK + usage callout */}
         <div
-          className="rounded-[10px] px-4 py-3 text-[12px]"
-          style={{ background: '#f6f7fb', border: '1px solid #e2e4ef', color: '#9498b3' }}
+          className="rounded-[12px] p-4 flex flex-col sm:flex-row sm:items-center gap-4"
+          style={{ background: '#f0f4ff', border: '1px solid #3b6cff18' }}
         >
-          <span className="font-semibold text-[#5c6078]">Usage: </span>
-          <code style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}>
-            Authorization: Bearer ag_live_...
-          </code>
-          {' — '}
-          <a href="/docs" className="text-[#3b6cff] no-underline hover:underline">View full API docs</a>
+          {/* SDK info */}
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            <div
+              className="w-9 h-9 rounded-[10px] flex items-center justify-center text-[18px] shrink-0"
+              style={{ background: '#ebf0ff', border: '1px solid #3b6cff18' }}
+            >
+              📦
+            </div>
+            <div className="min-w-0">
+              <div className="text-[13px] font-semibold text-[#1a1d2e] mb-0.5">
+                Use your key with the TypeScript SDK
+              </div>
+              <code
+                className="text-[12px] text-[#3b6cff]"
+                style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+              >
+                npm install @damitha-perera/agentgate
+              </code>
+            </div>
+          </div>
+
+          {/* Links */}
+          <div className="flex items-center gap-3 shrink-0">
+            <a
+              href="https://www.npmjs.com/package/@damitha-perera/agentgate"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[12px] font-semibold text-[#3b6cff] no-underline flex items-center gap-1"
+            >
+              npm ↗
+            </a>
+            <div className="w-px h-4 bg-[#3b6cff22]" />
+            <a
+              href="/docs"
+              className="text-[12px] font-semibold text-[#3b6cff] no-underline"
+            >
+              API docs →
+            </a>
+          </div>
         </div>
         </>}
 

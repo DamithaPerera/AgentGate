@@ -3,6 +3,7 @@ import { CopyButton } from './CopyButton';
 import { DocsSidebar } from './DocsSidebar';
 import { EndpointCard } from './EndpointCard';
 import type { Endpoint } from './EndpointCard';
+import { ScrollToTop } from '../ScrollToTop';
 
 // ── Section data ───────────────────────────────────────────────────────────────
 
@@ -789,6 +790,7 @@ console.log(result.decision); // 'ALLOWED' | 'DENIED' | 'ESCALATED'`}</pre>
 
         </div>
       </div>
+      <ScrollToTop />
     </main>
   );
 }

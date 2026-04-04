@@ -63,6 +63,36 @@ export default function LandingPage() {
               Sign in free
             </Link>
           </div>
+
+          {/* Hero illustration */}
+          <div
+            className="animate-fade-in-up delay-500"
+            style={{
+              marginTop: 56,
+              maxWidth: 620,
+              margin: '56px auto 0',
+              borderRadius: 20,
+              overflow: 'hidden',
+              border: '1px solid rgba(79,110,247,0.25)',
+              boxShadow: '0 0 0 1px rgba(79,110,247,0.1), 0 24px 80px rgba(0,0,0,0.5), 0 0 60px rgba(59,108,255,0.15)',
+            }}
+          >
+            {/* Window chrome */}
+            <div style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ff5f57', display: 'inline-block' }} />
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#febc2e', display: 'inline-block' }} />
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#28c840', display: 'inline-block' }} />
+            </div>
+            {/* SVG */}
+            <div style={{ background: 'linear-gradient(160deg, #0d1117 0%, #0f1620 100%)', padding: '8px 0 0' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/agentgate-icon.svg"
+                alt="AgentGate — authorization middleware illustration"
+                style={{ width: '100%', display: 'block' }}
+              />
+            </div>
+          </div>
         </div>
       </section>
 
