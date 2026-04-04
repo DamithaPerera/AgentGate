@@ -4,7 +4,7 @@
 
 **Hackathon:** "Authorized to Act: Auth0 for AI Agents" · Devpost · Deadline April 7, 2026
 
-**Live Demo:** [agent-gate-theta.vercel.app](https://agent-gate-theta.vercel.app) &nbsp;·&nbsp; **API Docs:** [agent-gate-theta.vercel.app/docs](https://agent-gate-theta.vercel.app/docs)
+**Live Demo:** [agent-gate-theta.vercel.app](https://agent-gate-theta.vercel.app) &nbsp;·&nbsp; **API Docs:** [agent-gate-theta.vercel.app/docs](https://agent-gate-theta.vercel.app/docs) &nbsp;·&nbsp; **npm:** [@damitha-perera/agentgate](https://www.npmjs.com/package/@damitha-perera/agentgate)
 
 ---
 
@@ -98,7 +98,47 @@ BASE_URL=http://localhost:3000 npm run test:agent
 
 ---
 
-## Connect Your Own Agent
+## TypeScript SDK
+
+The official SDK is published on npm — one import, one call, full TypeScript types.
+
+```bash
+npm install @damitha-perera/agentgate
+```
+
+```ts
+import { AgentGate } from '@damitha-perera/agentgate';
+
+const gate = new AgentGate({
+  baseUrl: 'https://agent-gate-theta.vercel.app',
+  apiKey: process.env.AGENTGATE_API_KEY!,
+});
+
+// Register once — store the token
+const agent = await gate.register({
+  name: 'my-crewai-agent',
+  framework: 'crewai',
+  capabilities: ['gmail.read', 'github.write'],
+  trustLevel: 1,
+});
+
+// Authorize before every action
+const result = await gate.authorize({
+  agentToken: agent.token,
+  action: { type: 'read', operation: 'list_emails', service: 'gmail' },
+  resource: { type: 'email' },
+});
+
+if (!result.allowed) throw new Error(result.reason);
+// result.decision → 'ALLOWED' | 'DENIED' | 'ESCALATED'
+// result.token.access_token → scoped, expires in 60s
+```
+
+**SDK methods:** `register` · `authorize` · `revokeAgent` · `revokeService` · `panic`
+
+---
+
+## Connect Your Own Agent (REST API)
 
 Any agent that can make HTTP requests works. No SDK required.
 
@@ -190,7 +230,11 @@ Programmatic access uses `ag_live_` prefixed API keys:
 The test agent covers 9 suites with 30+ scenarios:
 
 ```bash
-BASE_URL=https://agent-gate-theta.vercel.app npm run test:agent
+# Linux / macOS
+AGENTGATE_URL=https://agent-gate-theta.vercel.app AGENTGATE_API_KEY=ag_live_... npm run test:agent
+
+# Windows PowerShell
+$env:AGENTGATE_URL="https://agent-gate-theta.vercel.app"; $env:AGENTGATE_API_KEY="ag_live_..."; npm run test:agent
 ```
 
 | Suite | Description |
