@@ -479,6 +479,7 @@ export default function DocsPage() {
         <aside className="w-[220px] shrink-0 sticky top-[60px] self-start h-[calc(100vh-60px)] overflow-y-auto py-8 pr-6">
           <div className="flex flex-col gap-0.5">
             <SidebarLink href="#introduction" label="Introduction" />
+            <SidebarLink href="#sdk" label="TypeScript SDK" />
             <SidebarLink href="#authentication" label="Authentication" />
             <div className="h-2" />
             <span className="text-[10px] font-bold text-[#9498b3] uppercase tracking-[0.1em] px-2.5 py-0.5 font-[family-name:var(--font-ibm-plex-mono)]">
@@ -513,6 +514,85 @@ export default function DocsPage() {
                 </span>
               ))}
             </div>
+          </section>
+
+          {/* SDK */}
+          <section id="sdk" className="mb-14">
+            <SectionHeading id="sdk-heading">TypeScript SDK</SectionHeading>
+            <p className="text-[14px] text-[#5c6078] leading-[1.75] mb-5">
+              The official SDK wraps the REST API — one import, one call. Full TypeScript types included.
+            </p>
+
+            {/* Install */}
+            <div className="mb-5">
+              <CodeBlock label="Install" code={`npm install @damitha-perera/agentgate`} copyable />
+            </div>
+
+            {/* Quick start */}
+            <Card className="mb-5">
+              <div className="px-5 py-3.5 border-b border-[#e2e4ef] bg-[#f6f7fb]">
+                <span className="text-[12px] font-bold text-[#5c6078] uppercase tracking-[0.06em] font-[family-name:var(--font-ibm-plex-mono)]">Quick Start</span>
+              </div>
+              <div className="p-5">
+                <CodeBlock label="TypeScript" copyable code={`import { AgentGate } from '@damitha-perera/agentgate';
+
+const gate = new AgentGate({
+  baseUrl: 'https://agent-gate-theta.vercel.app',
+  apiKey: process.env.AGENTGATE_API_KEY!,
+});
+
+// 1. Register your agent once — store the token
+const agent = await gate.register({
+  name: 'my-crewai-agent',
+  framework: 'crewai',
+  capabilities: ['gmail.read', 'github.write'],
+  trustLevel: 1,
+});
+
+// 2. Authorize before every action
+const result = await gate.authorize({
+  agentToken: agent.token,
+  action: { type: 'read', operation: 'list_emails', service: 'gmail' },
+  resource: { type: 'email' },
+  context: { recipientExternal: false },
+});
+
+if (!result.allowed) throw new Error(result.reason);
+
+// result.token.access_token — scoped, expires in 60s
+console.log(result.decision); // 'ALLOWED' | 'DENIED' | 'ESCALATED'`} />
+              </div>
+            </Card>
+
+            {/* SDK methods table */}
+            <Card className="mb-5">
+              <div className="px-5 py-3.5 border-b border-[#e2e4ef] bg-[#f6f7fb]">
+                <span className="text-[12px] font-bold text-[#5c6078] uppercase tracking-[0.06em] font-[family-name:var(--font-ibm-plex-mono)]">SDK Methods</span>
+              </div>
+              <div className="divide-y divide-[#e2e4ef]">
+                {[
+                  { method: 'gate.register(opts)', returns: 'Promise<RegisteredAgent>', desc: 'Register a new agent, get identity token' },
+                  { method: 'gate.authorize(opts)', returns: 'Promise<AuthorizeResult>', desc: 'Run the 5-gate pipeline, get decision + scoped token' },
+                  { method: 'gate.revokeAgent(id)', returns: 'Promise<RevokeResult>', desc: 'Revoke a specific agent' },
+                  { method: 'gate.revokeService(svc)', returns: 'Promise<RevokeResult>', desc: 'Revoke all agents for a service' },
+                  { method: 'gate.panic()', returns: 'Promise<RevokeResult>', desc: 'Emergency — revoke all agents immediately' },
+                ].map(row => (
+                  <div key={row.method} className="px-5 py-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+                    <code className="font-[family-name:var(--font-ibm-plex-mono)] text-[12px] text-[#3b6cff] shrink-0 whitespace-nowrap">{row.method}</code>
+                    <code className="font-[family-name:var(--font-ibm-plex-mono)] text-[11px] text-[#9498b3] shrink-0">{row.returns}</code>
+                    <span className="text-[13px] text-[#5c6078]">{row.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            <InfoCard variant="blue">
+              <strong className="text-[#1a1d2e]">npm package:</strong>{' '}
+              <a href="https://www.npmjs.com/package/@damitha-perera/agentgate" target="_blank" rel="noopener noreferrer" className="text-[#3b6cff] font-mono text-[12px]">
+                @damitha-perera/agentgate
+              </a>
+              {' '}— TypeScript types included, zero runtime dependencies, ESM + CJS.
+            </InfoCard>
           </section>
 
           {/* Authentication */}
