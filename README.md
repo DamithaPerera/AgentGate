@@ -393,4 +393,4 @@ agentgate/
 
 ## License
 
-MIT
+[MIT](./LICENSE) © 2026 Damitha Perera
