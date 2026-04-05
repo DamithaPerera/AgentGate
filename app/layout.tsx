@@ -1,6 +1,21 @@
 import type { Metadata } from 'next';
+import { DM_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
 import './globals.css';
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-dm-sans',
+  display: 'swap',
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-ibm-plex-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'AgentGate — Authorization Middleware for AI Agents',
@@ -15,8 +30,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen antialiased">
+    <html lang="en" className={`${dmSans.variable} ${ibmPlexMono.variable}`}>
+      <body
+        className="min-h-screen antialiased"
+        style={{ fontFamily: 'var(--font-dm-sans), DM Sans, -apple-system, sans-serif' }}
+      >
         {children}
         <Toaster position="top-right" richColors closeButton />
       </body>

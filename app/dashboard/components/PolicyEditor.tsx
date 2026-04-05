@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import type { PolicyRule } from '@/lib/types';
+import { Badge, Toggle, StatusBanner } from './ui';
 
 interface Props { rules: PolicyRule[]; onRulesChange: (rules: PolicyRule[]) => void; }
 
@@ -44,72 +45,73 @@ export function PolicyEditor({ rules, onRulesChange }: Props) {
     onRulesChange(updated);
   };
 
-  const decisionStyle: Record<string, string> = {
-    ALLOW: 'var(--color-success-text)',
-    ESCALATE: 'var(--color-warning-text)',
-    DENY: 'var(--color-danger-text)',
+  const decisionStyle = (decision: string): { color: string; bg: string; border: string } => {
+    if (decision === 'ALLOW')    return { color: '#12b76a', bg: '#e7faf0', border: '#12b76a33' };
+    if (decision === 'ESCALATE') return { color: '#f59e0b', bg: '#fefce8', border: '#f59e0b33' };
+    if (decision === 'DENY')     return { color: '#ef4444', bg: '#fef2f2', border: '#ef444433' };
+    return { color: '#5c6078', bg: '#f0f1f7', border: '#e2e4ef' };
   };
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       {/* Input row */}
-      <div className="flex flex-col sm:flex-row gap-2">
-        <input type="text"
+      <div className="flex gap-2">
+        <input
+          type="text"
           placeholder='e.g. "Agents can read Gmail but cannot send to external addresses"'
           value={text}
           onChange={e => setText(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleCompile()}
-          className="flex-1 rounded px-3 py-1.5 text-sm border focus:outline-none"
-          style={{ background: 'var(--color-bg-surface)', borderColor: 'var(--color-border)',
-            color: 'var(--color-text-high)' }} />
-        <button onClick={handleCompile} disabled={compiling || !text.trim()}
-          className="text-white text-sm font-semibold px-4 py-1.5 rounded disabled:opacity-50 transition-opacity hover:opacity-90"
-          style={{ background: 'var(--color-brand)' }}>
+          className="flex-1 rounded-[10px] px-3.5 py-2 text-[13px] border border-[#e2e4ef] bg-[#f0f1f7] text-[#1a1d2e] outline-none min-w-0 placeholder:text-[#9498b3] focus:border-[#3b6cff] transition-colors"
+          onFocus={e => { e.target.style.boxShadow = '0 0 0 3px rgba(59,108,255,0.12)'; }}
+          onBlur={e => { e.target.style.boxShadow = 'none'; }}
+        />
+        <button
+          onClick={handleCompile}
+          disabled={compiling || !text.trim()}
+          className="px-5 py-2 rounded-[10px] text-white font-semibold text-[13px] border-none cursor-pointer whitespace-nowrap transition-opacity"
+          style={{
+            background: 'linear-gradient(135deg, #3b6cff, #6b8fff)',
+            opacity: (compiling || !text.trim()) ? 0.5 : 1,
+            boxShadow: '0 2px 8px rgba(59,108,255,0.28)',
+          }}
+        >
           {compiling ? '…' : 'Apply'}
         </button>
       </div>
 
       {message && (
-        <div className="text-xs px-3 py-1.5 rounded border font-medium"
-          style={{
-            background: message.type === 'success' ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
-            color: message.type === 'success' ? 'var(--color-success-text)' : 'var(--color-danger-text)',
-            borderColor: message.type === 'success' ? '#ABF5D1' : '#FFBDAD',
-          }}>
-          {message.text}
-        </div>
+        <StatusBanner type={message.type} text={message.text} className="py-1.5" />
       )}
 
       {/* Rules list */}
-      <div className="space-y-1 max-h-40 overflow-y-auto">
-        {rules.map(rule => (
-          <div key={rule.id} className="flex items-center gap-2 px-3 py-1.5 rounded border text-xs"
-            style={{
-              background: rule.enabled ? 'var(--color-bg-surface)' : 'var(--color-bg-sunken)',
-              borderColor: 'var(--color-border)',
-              opacity: rule.enabled ? 1 : 0.55,
-            }}>
-            {/* Toggle */}
-            <button onClick={() => toggleRule(rule.id)} style={{
-                position: 'relative', flexShrink: 0, width: '2rem', height: '1rem',
-                borderRadius: '9999px', border: 'none', cursor: 'pointer',
-                background: rule.enabled ? 'var(--color-brand)' : 'var(--color-border-bold)',
-                transition: 'background 150ms',
-              }}>
-              <span style={{
-                position: 'absolute', top: '0.125rem', borderRadius: '50%',
-                width: '0.75rem', height: '0.75rem', background: '#fff',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
-                left: rule.enabled ? '1.125rem' : '0.125rem',
-                transition: 'left 150ms',
-              }} />
-            </button>
-            <span className="flex-1 truncate" style={{ color: 'var(--color-text-medium)' }}>{rule.name}</span>
-            <span className="font-semibold flex-shrink-0" style={{ color: decisionStyle[rule.decision] ?? 'var(--color-text-low)' }}>
-              {rule.decision}
-            </span>
-          </div>
-        ))}
+      <div className="flex flex-col max-h-40 overflow-y-auto">
+        {rules.map((rule, idx) => {
+          const ds = decisionStyle(rule.decision);
+          const isLast = idx === rules.length - 1;
+          return (
+            <div
+              key={rule.id}
+              className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[#eceef5]"
+              style={{
+                borderBottom: isLast ? 'none' : '1px solid #e2e4ef',
+                opacity: rule.enabled ? 1 : 0.5,
+              }}
+            >
+              <Toggle enabled={rule.enabled} onChange={() => toggleRule(rule.id)} />
+              <span className="flex-1 text-[12px] text-[#1a1d2e] truncate">{rule.name}</span>
+              <Badge
+                style={{
+                  color: ds.color,
+                  background: ds.bg,
+                  border: `1px solid ${ds.border}`,
+                }}
+              >
+                {rule.decision}
+              </Badge>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

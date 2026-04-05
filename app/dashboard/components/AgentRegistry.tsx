@@ -2,156 +2,118 @@
 import { useState } from 'react';
 import type { AgentIdentity } from '@/lib/types';
 import { Pagination } from './Pagination';
+import { Badge, AgentDot, RevokeButton, EmptyState } from './ui';
 
 const PAGE_SIZE = 5;
 
-interface Props {
-  agents: AgentIdentity[];
-  onRevoke: (id: string) => void;
-  onRevokeService: (service: string) => void;
-  onPanic: () => void;
-}
-
+const FRAMEWORK_COLORS: Record<string, string> = {
+  crewai: '#8b5cf6', langgraph: '#3b6cff', autogen: '#f59e0b', custom: '#5c6078', mcp: '#06b6d4',
+};
+const FRAMEWORK_BG: Record<string, string> = {
+  crewai: '#f3f0ff', langgraph: '#ebf0ff', autogen: '#fefce8', custom: '#f0f1f7', mcp: '#e0f9ff',
+};
 const FRAMEWORK_LABEL: Record<string, string> = {
   crewai: 'CrewAI', langgraph: 'LangGraph', autogen: 'AutoGen', custom: 'Custom', mcp: 'MCP',
 };
 
-function TrustBadge({ level }: { level: number }) {
-  const styles: { bg: string; color: string }[] = [
-    { bg: '#FFEBE6', color: '#BF2600' },
-    { bg: '#FFEBE6', color: '#BF2600' },
-    { bg: '#FFF0B3', color: '#FF8B00' },
-    { bg: '#FFF0B3', color: '#FF8B00' },
-    { bg: 'var(--color-brand-light)', color: 'var(--color-info-text)' },
-    { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
-  ];
-  const s = styles[level] ?? styles[0];
-  return (
-    <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-      style={{ background: s.bg, color: s.color }}>
-      Trust {level}
-    </span>
-  );
+interface Props {
+  agents: AgentIdentity[];
+  onRevoke: (id: string) => void;
 }
 
-export function AgentRegistry({ agents, onRevoke, onRevokeService, onPanic }: Props) {
-  const [panicConfirm, setPanicConfirm] = useState(false);
+export function AgentRegistry({ agents, onRevoke }: Props) {
   const [page, setPage] = useState(1);
-  const activeAgents = agents.filter(a => a.status === 'active');
   const totalPages = Math.max(1, Math.ceil(agents.length / PAGE_SIZE));
   const pagedAgents = agents.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const services = ['github', 'gmail', 'calendar'];
-  const hasService = (s: string) => activeAgents.some(a => a.capabilities.some(c => c.startsWith(s + '.')));
+
+  const trustStyle = (level: number): { bg: string; color: string; border: string } => {
+    if (level >= 4) return { bg: '#e7faf0', color: '#12b76a', border: '#12b76a33' };
+    if (level === 3) return { bg: '#fefce8', color: '#f59e0b', border: '#f59e0b33' };
+    return { bg: '#f3f0ff', color: '#8b5cf6', border: '#8b5cf633' };
+  };
 
   return (
-    <div className="flex flex-col h-full gap-3">
+    <div className="flex flex-col h-full">
       {/* Agent list */}
-      <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
+      <div className="flex-1 overflow-y-auto min-h-0">
         {agents.length === 0 ? (
-          <div className="text-xs text-center py-8" style={{ color: 'var(--color-text-subtle)' }}>
-            No agents registered yet.<br />Click ▶ Run Demo to get started.
-          </div>
-        ) : pagedAgents.map(agent => (
-          <div key={agent.id} className="rounded p-3 border transition-all"
-            style={{
-              background: agent.status === 'active' ? 'var(--color-bg-page)' : 'var(--color-danger-bg)',
-              borderColor: agent.status === 'active' ? 'var(--color-border)' : '#FFBDAD',
-              opacity: agent.status !== 'active' ? 0.7 : 1,
-            }}>
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="w-2 h-2 rounded-full flex-shrink-0"
-                    style={{ background: agent.status === 'active' ? 'var(--color-success)' : 'var(--color-danger)' }} />
-                  <span className="text-sm font-medium truncate" style={{ color: 'var(--color-text-high)' }}>{agent.name}</span>
-                </div>
-                <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                  <span className="text-xs px-1.5 py-0.5 rounded border font-medium"
-                    style={{ background: 'var(--color-bg-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-medium)' }}>
-                    {FRAMEWORK_LABEL[agent.framework] ?? agent.framework}
-                  </span>
-                  <TrustBadge level={agent.trustLevel} />
+          <EmptyState
+            icon="🤖"
+            message="No agents registered yet."
+            hint="Click Run Demo to get started."
+          />
+        ) : pagedAgents.map((agent, idx) => {
+          const tc = trustStyle(agent.trustLevel);
+          const fwColor = FRAMEWORK_COLORS[agent.framework] ?? '#5c6078';
+          const fwBg = FRAMEWORK_BG[agent.framework] ?? '#f0f1f7';
+          const isLast = idx === pagedAgents.length - 1;
+          return (
+            <div
+              key={agent.id}
+              className="px-5 py-4 transition-colors hover:bg-[#eceef5] group"
+              style={{
+                borderBottom: isLast ? 'none' : '1px solid #e2e4ef',
+                opacity: agent.status !== 'active' ? 0.6 : 1,
+              }}
+            >
+              {/* Name row */}
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <AgentDot active={agent.status === 'active'} />
+                  <span className="font-semibold text-[13px] text-[#1a1d2e] truncate">{agent.name}</span>
                   {agent.status !== 'active' && (
-                    <span className="text-xs font-semibold uppercase" style={{ color: 'var(--color-danger-text)' }}>{agent.status}</span>
+                    <Badge style={{ background: '#fef2f2', color: '#ef4444', border: '1px solid #ef444433' }}>
+                      {agent.status.toUpperCase()}
+                    </Badge>
                   )}
                 </div>
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {agent.capabilities.slice(0, 4).map(cap => (
-                    <span key={cap} className="text-xs px-1.5 py-0.5 rounded font-mono"
-                      style={{ background: 'var(--color-brand-light)', color: 'var(--color-info-text)' }}>
-                      {cap}
-                    </span>
-                  ))}
-                  {agent.capabilities.length > 4 && (
-                    <span className="text-xs" style={{ color: 'var(--color-text-subtle)' }}>+{agent.capabilities.length - 4}</span>
-                  )}
-                </div>
+                {agent.status === 'active' && (
+                  <RevokeButton onClick={() => onRevoke(agent.id)} />
+                )}
               </div>
-              {agent.status === 'active' && (
-                <button onClick={() => onRevoke(agent.id)}
-                  className="text-xs font-medium px-2 py-1 rounded border flex-shrink-0 transition-colors hover:opacity-80"
-                  style={{ color: 'var(--color-danger-text)', borderColor: '#FFBDAD', background: 'var(--color-danger-bg)' }}>
-                  Revoke
-                </button>
-              )}
+
+              {/* Meta row */}
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                <Badge
+                  style={{
+                    background: fwBg,
+                    color: fwColor,
+                    border: `1px solid ${fwColor}33`,
+                  }}
+                >
+                  {FRAMEWORK_LABEL[agent.framework] ?? agent.framework}
+                </Badge>
+                <Badge style={{ background: tc.bg, color: tc.color, border: `1px solid ${tc.border}` }}>
+                  T{agent.trustLevel}
+                </Badge>
+              </div>
+
+              {/* Scopes row */}
+              <div className="flex flex-wrap gap-[4px]">
+                {agent.capabilities.slice(0, 4).map(cap => (
+                  <span
+                    key={cap}
+                    className="text-[10px] px-[6px] py-[2px] rounded-[6px] bg-[#f0f1f7] text-[#5c6078] border border-[#e2e4ef]"
+                    style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+                  >
+                    {cap}
+                  </span>
+                ))}
+                {agent.capabilities.length > 4 && (
+                  <span
+                    className="text-[10px] px-[6px] py-[2px] text-[#9498b3]"
+                    style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+                  >
+                    +{agent.capabilities.length - 4}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <Pagination page={page} totalPages={totalPages} onPage={setPage} />
-
-      {/* Connected Services */}
-      <div className="pt-3" style={{ borderTop: '1px solid var(--color-border)' }}>
-        <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--color-text-low)' }}>Connected Services</div>
-        <div className="space-y-1.5">
-          {services.map(service => (
-            <div key={service} className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full"
-                  style={{ background: hasService(service) ? 'var(--color-success)' : 'var(--color-border-bold)' }} />
-                <span className="text-sm" style={{ color: 'var(--color-text-medium)' }}>
-                  {service === 'gmail' ? 'Google (Gmail)' : service.charAt(0).toUpperCase() + service.slice(1)}
-                </span>
-              </div>
-              {hasService(service) && (
-                <button onClick={() => onRevokeService(service)}
-                  className="text-xs font-medium px-2 py-0.5 rounded border transition-opacity hover:opacity-80"
-                  style={{ color: 'var(--color-danger-text)', borderColor: '#FFBDAD', background: 'var(--color-danger-bg)' }}>
-                  Revoke
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Panic button */}
-      <div>
-        {panicConfirm ? (
-          <div className="space-y-2">
-            <p className="text-xs text-center font-medium" style={{ color: 'var(--color-danger-text)' }}>Revoke ALL agents and tokens?</p>
-            <div className="flex gap-2">
-              <button onClick={() => { onPanic(); setPanicConfirm(false); }}
-                className="flex-1 text-white text-xs font-semibold py-2 rounded transition-opacity hover:opacity-90"
-                style={{ background: 'var(--color-danger)' }}>
-                Confirm
-              </button>
-              <button onClick={() => setPanicConfirm(false)}
-                className="flex-1 text-xs font-medium py-2 rounded border transition-colors hover:opacity-80"
-                style={{ color: 'var(--color-text-medium)', borderColor: 'var(--color-border)', background: 'var(--color-bg-surface)' }}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button onClick={() => setPanicConfirm(true)}
-            className="w-full text-xs font-semibold py-2 rounded border transition-opacity hover:opacity-80"
-            style={{ color: 'var(--color-danger-text)', borderColor: '#FFBDAD', background: 'var(--color-danger-bg)' }}>
-            PANIC: Revoke All
-          </button>
-        )}
-      </div>
     </div>
   );
 }

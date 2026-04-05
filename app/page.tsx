@@ -1,160 +1,242 @@
 import Link from 'next/link';
+import { ScrollToTop } from './ScrollToTop';
+import { LandingNav } from './components/landing/LandingNav';
+import { LandingFooter } from './components/landing/LandingFooter';
+import { AgentGraphSVG } from './components/landing/AgentGraphSVG';
+import { SectionBadge } from './components/landing/SectionBadge';
+import { SectionHeading } from './components/landing/SectionHeading';
+import { GateCard, GATES } from './components/landing/GateCard';
+import { FeatureCard, FEATURES } from './components/landing/FeatureCard';
+import { FrameworkHub } from './components/landing/FrameworkHub';
+import { CodeCard } from './components/landing/CodeCard';
+
+const STATS = [
+  { value: '93%',     label: 'of AI agent projects have no authorization layer',   color: '#E11D48' },
+  { value: '< 1ms',  label: 'authorization overhead per request',                   color: '#3b6cff' },
+  { value: '5 Gates', label: 'every request passes through before execution',       color: '#9333EA' },
+  { value: '100%',   label: 'tamper-evident audit trail coverage',                  color: '#16A34A' },
+];
+
+const STANDARDS = [
+  'Auth0 Token Vault', 'Auth0 CIBA + Guardian', 'IETF draft-klrc-aiagent-auth-00',
+  'NIST AI Agent Standards', 'AuthZEN (OpenID Foundation)', 'SPIFFE / WIMSE', 'OPA (CNCF Graduated)',
+];
+
+const QUICK_START = [
+  {
+    step: 1,
+    title: 'Register your agent',
+    code: `curl -X POST /api/agents/register \\
+  -H "Authorization: Bearer ag_live_..." \\
+  -d '{
+    "name": "my-agent",
+    "framework": "crewai",
+    "capabilities": ["gmail.read"],
+    "trustTier": "T1"
+  }'
+# → { "agentId": "...", "token": "eyJ..." }`,
+  },
+  {
+    step: 2,
+    title: 'Authorize every action',
+    stepColor: '#16A34A',
+    code: `curl -X POST /api/authorize \\
+  -H "Authorization: Bearer ag_live_..." \\
+  -d '{
+    "agentToken": "eyJ...",
+    "action": { "type": "read",
+      "operation": "list_emails",
+      "service": "gmail" }
+  }'
+# → { "allowed": true, "token": {...} }`,
+  },
+];
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen" style={{ background: 'var(--color-bg-page)', color: 'var(--color-text-high)' }}>
-      {/* Nav */}
-      <nav style={{ background: 'var(--color-bg-surface)', borderBottom: '1px solid var(--color-border)' }}
-        className="px-6 py-0 flex items-center justify-between h-14 sticky top-0 z-50">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded flex items-center justify-center text-white font-bold text-sm"
-            style={{ background: 'var(--color-brand)' }}>AG</div>
-          <span className="font-semibold text-base tracking-tight" style={{ color: 'var(--color-text-high)' }}>AgentGate</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link href="/auth/login?returnTo=/dashboard"
-            className="text-sm font-medium transition-colors"
-            style={{ color: 'var(--color-text-medium)' }}>
-            Log in
-          </Link>
-          <Link href="/dashboard"
-            className="text-sm font-medium px-4 py-1.5 rounded text-white transition-opacity hover:opacity-90"
-            style={{ background: 'var(--color-brand)' }}>
-            Open Dashboard
-          </Link>
-        </div>
-      </nav>
+    <main className="min-h-screen" style={{ fontFamily: 'Inter, -apple-system, sans-serif' }}>
 
-      {/* Hero */}
-      <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium mb-8"
-          style={{ background: 'var(--color-brand-light)', color: 'var(--color-info-text)' }}>
-          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--color-brand)' }}></span>
-          Built for NIST AI Agent Standards · IETF draft-klrc-aiagent-auth-00
-        </div>
+      <LandingNav />
 
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-5 leading-tight"
-          style={{ color: 'var(--color-text-high)' }}>
-          The{' '}
-          <span style={{ color: 'var(--color-brand)' }}>missing authorization layer</span>
-          <br />
-          for AI agents
-        </h1>
+      {/* ── Hero ────────────────────────────────────────────────── */}
+      <section style={{ background: 'linear-gradient(160deg, #0A0F1E 0%, #0F1E3D 50%, #0A1628 100%)', padding: '80px 24px', position: 'relative', overflow: 'hidden' }}>
+        {/* Glow orbs */}
+        <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,108,255,0.25) 0%, transparent 70%)', top: -200, left: '10%', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)', top: -100, right: '5%', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,211,165,0.08) 0%, transparent 70%)', bottom: -100, right: '30%', pointerEvents: 'none' }} />
 
-        <p className="text-lg max-w-3xl mx-auto mb-10 leading-relaxed"
-          style={{ color: 'var(--color-text-medium)' }}>
-          AgentGate is a drop-in security middleware that gives every AI agent a
-          cryptographic identity, evaluates every action against user-defined policies,
-          escalates sensitive requests for human approval via CIBA, and produces a
-          tamper-evident audit trail — all powered by Auth0 Token Vault.
-        </p>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 48 }} className="flex-col lg:flex-row">
 
-        <div className="flex items-center justify-center gap-3 flex-wrap">
-          <Link href="/dashboard"
-            className="text-white font-medium px-6 py-2.5 rounded text-sm transition-opacity hover:opacity-90"
-            style={{ background: 'var(--color-brand)' }}>
-            Open Dashboard
-          </Link>
-          <a href="https://github.com"
-            className="font-medium px-6 py-2.5 rounded text-sm transition-colors border"
-            style={{ color: 'var(--color-brand)', borderColor: 'var(--color-brand)', background: 'var(--color-bg-surface)' }}>
-            View on GitHub
-          </a>
+          {/* LEFT: text */}
+          <div className="animate-fade-in-up" style={{ flex: '1 1 0', minWidth: 0 }}>
+            {/* Badge */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(59,108,255,0.15)', border: '1px solid rgba(139,92,246,0.35)', borderRadius: 999, padding: '6px 16px', marginBottom: 28 }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#36B37E', display: 'inline-block', boxShadow: '0 0 8px #36B37E' }} className="animate-pulse" />
+              <span style={{ color: '#93C5FD', fontSize: 13, fontWeight: 500 }}>Built for NIST AI Agent Standards · IETF draft-klrc-aiagent-auth-00</span>
+            </div>
+
+            <h1 className="animate-fade-in-up delay-100" style={{ fontSize: 'clamp(36px, 4.5vw, 60px)', fontWeight: 800, lineHeight: 1.08, color: '#fff', marginBottom: 20, letterSpacing: '-0.02em' }}>
+              The{' '}
+              <span style={{ background: 'linear-gradient(135deg, #60A5FA, #818CF8, #38BDF8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                missing authorization
+              </span>
+              {' '}layer
+              <br />for AI agents
+            </h1>
+
+            <p className="animate-fade-in-up delay-200" style={{ fontSize: 17, color: '#94A3B8', marginBottom: 36, lineHeight: 1.75, maxWidth: 480 }}>
+              Drop-in security middleware that gives every AI agent a cryptographic identity, evaluates every action against policies, and produces a tamper-evident audit trail — powered by Auth0.
+            </p>
+
+            {/* CTAs */}
+            <div className="animate-fade-in-up delay-300" style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <Link href="/dashboard" className="hover:scale-105" style={{ padding: '14px 32px', borderRadius: 10, background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)', color: '#fff', fontWeight: 700, fontSize: 15, textDecoration: 'none', boxShadow: '0 4px 24px rgba(59,108,255,0.5)', display: 'inline-block' }}>
+                Open Dashboard →
+              </Link>
+              <Link href="/auth/login?returnTo=/dashboard" prefetch={false} style={{ padding: '14px 28px', borderRadius: 10, background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600, fontSize: 15, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.15)', display: 'inline-block' }}>
+                Sign in free
+              </Link>
+            </div>
+
+            {/* Trust chips */}
+            <div className="animate-fade-in-up delay-500" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 32 }}>
+              {['Auth0 CIBA', 'SPIFFE IDs', 'SHA-256 Audit', 'OPA Policy'].map(t => (
+                <span key={t} style={{ fontSize: 12, color: '#64748B', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, padding: '4px 10px' }}>{t}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* RIGHT: animated graph */}
+          <AgentGraphSVG />
         </div>
       </section>
 
-      {/* Problem stat */}
-      <section className="max-w-5xl mx-auto px-6 py-12">
-        <div className="rounded-lg p-8 text-center border"
-          style={{ background: 'var(--color-danger-bg)', borderColor: '#FFBDAD' }}>
-          <div className="text-6xl font-bold mb-3" style={{ color: 'var(--color-danger)' }}>93%</div>
-          <p className="text-lg font-semibold mb-2" style={{ color: 'var(--color-danger-text)' }}>
-            of AI agent projects use unscoped API keys
-          </p>
-          <p style={{ color: 'var(--color-text-medium)' }}>
-            No per-agent identity. No consent mechanism. No audit trail. No revocation.
-            <br />
-            NIST launched the AI Agent Standards Initiative in February 2026 because of this.
-          </p>
-        </div>
-      </section>
-
-      {/* Five Gates */}
-      <section className="max-w-5xl mx-auto px-6 py-12">
-        <h2 className="text-2xl font-bold text-center mb-2" style={{ color: 'var(--color-text-high)' }}>The Five Gates</h2>
-        <p className="text-center mb-10 text-sm" style={{ color: 'var(--color-text-medium)' }}>Every request. Every agent. No exceptions.</p>
-
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-          {[
-            { num: '1', name: 'Identity',  desc: 'Verify agent SPIFFE ID & OAuth token',                       bg: 'var(--color-info-bg)',    num_c: 'var(--color-info-text)' },
-            { num: '2', name: 'Intent',    desc: 'Parse AuthZEN 4-tuple: who, what, where, context',            bg: 'var(--color-brand-light)', num_c: 'var(--color-brand)' },
-            { num: '3', name: 'Policy',    desc: 'Evaluate rules → ALLOW / ESCALATE / DENY',                   bg: '#F3F0FF',                 num_c: '#5243AA' },
-            { num: '4', name: 'Consent',   desc: 'Auth0 CIBA push notification for human approval',            bg: 'var(--color-warning-bg)', num_c: 'var(--color-warning-text)' },
-            { num: '5', name: 'Token',     desc: 'Issue scoped, time-limited token from Token Vault',          bg: 'var(--color-success-bg)', num_c: 'var(--color-success-text)' },
-          ].map((gate) => (
-            <div key={gate.num} className="rounded-lg p-5 text-center border"
-              style={{ background: gate.bg, borderColor: 'var(--color-border)' }}>
-              <div className="text-3xl font-bold mb-2" style={{ color: gate.num_c }}>{gate.num}</div>
-              <div className="font-semibold text-sm mb-1" style={{ color: 'var(--color-text-high)' }}>{gate.name}</div>
-              <div className="text-xs" style={{ color: 'var(--color-text-medium)' }}>{gate.desc}</div>
+      {/* ── Stats strip ─────────────────────────────────────────── */}
+      <section style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', padding: '40px 24px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32, textAlign: 'center' }}>
+          {STATS.map((s, i) => (
+            <div key={s.value} className={`animate-fade-in-up delay-${(i + 1) * 100}`}>
+              <div style={{ fontSize: 32, fontWeight: 800, color: s.color, marginBottom: 6 }}>{s.value}</div>
+              <div style={{ fontSize: 13, color: '#64748B', lineHeight: 1.5 }}>{s.label}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Features */}
-      <section className="max-w-5xl mx-auto px-6 py-12" style={{ borderTop: '1px solid var(--color-border)' }}>
-        <h2 className="text-2xl font-bold text-center mb-10" style={{ color: 'var(--color-text-high)' }}>What AgentGate Builds</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {[
-            { icon: '🔑', title: 'Cryptographic Agent Identity',  desc: 'Every agent gets a SPIFFE ID and signed JWT. Anonymous agents are rejected before they touch any resource.' },
-            { icon: '⚖️', title: 'OPA Policy Engine',             desc: 'AuthZEN 4-tuple evaluation (subject + action + resource + context) with natural language policy compilation.' },
-            { icon: '📱', title: 'CIBA Human-in-the-Loop',        desc: 'Sensitive actions trigger Auth0 Guardian push notifications. Users approve or deny in real-time.' },
-            { icon: '🏦', title: 'Auth0 Token Vault',             desc: 'Agents never see raw OAuth tokens. Token Vault issues scoped, time-limited credentials (TTL: 60s).' },
-            { icon: '🔗', title: 'Hash-Chained Audit Trail',      desc: 'SHA-256 hash chain over every decision. Tamper-evident, exportable as JSON, verifiable in-dashboard.' },
-            { icon: '⚡', title: 'Cascade Revocation',            desc: 'Revoke one agent, one service, or everything (PANIC). All downstream tokens destroyed instantly.' },
-          ].map((f) => (
-            <div key={f.title} className="rounded-lg p-5 border"
-              style={{ background: 'var(--color-bg-surface)', borderColor: 'var(--color-border)' }}>
-              <div className="text-2xl mb-3">{f.icon}</div>
-              <h3 className="font-semibold text-sm mb-1.5" style={{ color: 'var(--color-text-high)' }}>{f.title}</h3>
-              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-text-medium)' }}>{f.desc}</p>
-            </div>
-          ))}
+      {/* ── Five Gates ──────────────────────────────────────────── */}
+      <section style={{ background: '#fff', padding: '100px 24px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center' }}>
+            <SectionBadge variant="blue">The Five Gates</SectionBadge>
+            <SectionHeading
+              title="Every request. Every agent. No exceptions."
+              subtitle="A five-layer protocol that runs in under 1ms, invisible to agents but enforced on every call."
+            />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+            {GATES.map(gate => <GateCard key={gate.num} gate={gate} />)}
+          </div>
         </div>
       </section>
 
-      {/* Standards */}
-      <section className="max-w-5xl mx-auto px-6 py-12" style={{ borderTop: '1px solid var(--color-border)' }}>
-        <h2 className="text-xl font-bold text-center mb-6" style={{ color: 'var(--color-text-high)' }}>Built on Real Standards</h2>
-        <div className="flex flex-wrap justify-center gap-2">
-          {['Auth0 Token Vault','Auth0 CIBA + Guardian','IETF draft-klrc-aiagent-auth-00','NIST AI Agent Standards','AuthZEN (OpenID Foundation)','SPIFFE/WIMSE','OPA (CNCF Graduated)'].map(s => (
-            <span key={s} className="rounded-full px-3 py-1 text-xs font-medium border"
-              style={{ background: 'var(--color-bg-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-medium)' }}>
-              {s}
-            </span>
-          ))}
+      {/* ── Features — dark section ──────────────────────────────── */}
+      <section style={{ background: 'linear-gradient(160deg, #0A0F1E 0%, #0F1E3D 100%)', padding: '100px 24px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,82,204,0.15) 0%, transparent 70%)', top: -100, right: -100, pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <div style={{ textAlign: 'center' }}>
+            <SectionBadge variant="dark">What AgentGate Builds</SectionBadge>
+            <SectionHeading
+              dark
+              title="Enterprise-grade security for every agent"
+              subtitle="Six security layers that work together to ensure no agent ever acts without authorization."
+            />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+            {FEATURES.map(f => <FeatureCard key={f.title} feature={f} />)}
+          </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="max-w-5xl mx-auto px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold mb-3" style={{ color: 'var(--color-text-high)' }}>Ready to see it in action?</h2>
-        <p className="mb-8 text-sm" style={{ color: 'var(--color-text-medium)' }}>
-          Click &quot;Run Demo&quot; in the dashboard to watch three agents register, request access, trigger CIBA, and get cascade-revoked in real-time.
-        </p>
-        <Link href="/dashboard"
-          className="text-white font-medium px-8 py-3 rounded text-sm transition-opacity hover:opacity-90 inline-block"
-          style={{ background: 'var(--color-brand)' }}>
-          Open Dashboard →
-        </Link>
+      {/* ── Framework integrations ──────────────────────────────── */}
+      <section style={{ background: '#fff', padding: '100px 24px', borderTop: '1px solid #E2E8F0' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center' }}>
+            <SectionBadge variant="green">Framework Agnostic</SectionBadge>
+            <SectionHeading
+              title="One endpoint. Every agent framework."
+              subtitle="Any agent that can make an HTTP request works with AgentGate. No framework lock-in."
+            />
+          </div>
+          <FrameworkHub />
+          <p style={{ textAlign: 'center', marginTop: 48, color: '#94A3B8', fontSize: 14 }}>
+            All frameworks use the same single endpoint —{' '}
+            <code style={{ background: '#F1F5F9', padding: '2px 8px', borderRadius: 6, fontSize: 13, color: '#3b6cff', fontFamily: 'IBM Plex Mono, monospace' }}>
+              POST /api/authorize
+            </code>
+          </p>
+        </div>
       </section>
 
-      {/* Footer */}
-      <footer className="px-6 py-6 text-center text-xs" style={{ borderTop: '1px solid var(--color-border)', color: 'var(--color-text-subtle)' }}>
-        <p>AgentGate · Built for the &quot;Authorized to Act: Auth0 for AI Agents&quot; Hackathon · Powered by Auth0 Token Vault</p>
-        <p className="mt-1">The authorization layer the IETF left as &quot;TODO Security&quot;</p>
-      </footer>
+      {/* ── Standards ───────────────────────────────────────────── */}
+      <section style={{ background: '#F8FAFC', padding: '80px 24px', borderTop: '1px solid #E2E8F0' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
+          <h2 className="animate-fade-in-up" style={{ fontSize: 28, fontWeight: 800, color: '#0F172A', marginBottom: 8 }}>Built on Real Standards</h2>
+          <p className="animate-fade-in-up delay-100" style={{ color: '#64748B', fontSize: 15, marginBottom: 40 }}>Not invented here — built on IETF, NIST, CNCF, and OpenID Foundation specifications.</p>
+          <div className="animate-fade-in-up delay-200" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 10 }}>
+            {STANDARDS.map(s => (
+              <span key={s} style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 999, padding: '7px 16px', fontSize: 13, fontWeight: 500, color: '#374151', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>{s}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Quick Start ─────────────────────────────────────────── */}
+      <section style={{ background: '#fff', padding: '100px 24px', borderTop: '1px solid #E2E8F0' }}>
+        <div style={{ maxWidth: 860, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center' }}>
+            <SectionBadge variant="green">Quick Start</SectionBadge>
+            <SectionHeading
+              title="Connect your agent in 2 API calls"
+              subtitle="No SDK required. Any agent that can make HTTP requests works."
+            />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: 20 }}>
+            {QUICK_START.map(item => (
+              <CodeCard key={item.step} {...item} />
+            ))}
+          </div>
+          <div style={{ textAlign: 'center', marginTop: 32 }}>
+            <Link href="/docs" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#3b6cff', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
+              View full API reference →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ─────────────────────────────────────────────────── */}
+      <section style={{ background: 'linear-gradient(160deg, #0A0F1E 0%, #0F1E3D 100%)', padding: '100px 24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,108,255,0.2) 0%, transparent 70%)', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 640, margin: '0 auto', position: 'relative', zIndex: 1 }} className="animate-fade-in-up">
+          <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, color: '#fff', marginBottom: 16, letterSpacing: '-0.02em' }}>
+            Ready to secure your AI agents?
+          </h2>
+          <p style={{ color: '#94A3B8', fontSize: 16, marginBottom: 40, lineHeight: 1.75 }}>
+            Open the dashboard to watch agents register, request access, trigger CIBA consent, and get cascade-revoked in real-time.
+          </p>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/dashboard" style={{ padding: '14px 36px', borderRadius: 10, background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)', color: '#fff', fontWeight: 700, fontSize: 16, textDecoration: 'none', boxShadow: '0 4px 24px rgba(59,108,255,0.5)', display: 'inline-block' }}>
+              Open Dashboard →
+            </Link>
+            <Link href="/auth/login?returnTo=/dashboard" prefetch={false} style={{ padding: '14px 28px', borderRadius: 10, background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600, fontSize: 15, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.15)', display: 'inline-block' }}>
+              Sign in free
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <ScrollToTop />
+
+      <LandingFooter />
     </main>
   );
 }

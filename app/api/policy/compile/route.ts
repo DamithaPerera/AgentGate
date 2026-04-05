@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { compileNaturalLanguagePolicy } from '@/lib/policy/compiler';
 import { getRules, saveRules } from '@/lib/policy/engine';

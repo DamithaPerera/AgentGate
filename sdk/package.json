@@ -1,0 +1,47 @@
+{
+  "name": "@damitha-perera/agentgate",
+  "version": "0.1.1",
+  "description": "Authorization middleware SDK for AI agents — powered by AgentGate",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "ai-agent",
+    "authorization",
+    "auth0",
+    "security",
+    "middleware",
+    "crewai",
+    "langgraph",
+    "autogen",
+    "mcp",
+    "agentgate"
+  ],
+  "author": "Damitha Perera",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DamithaPerera/AgentGate.git"
+  },
+  "homepage": "https://agent-gate-theta.vercel.app/docs",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import type { AuditEntry } from '@/lib/types';
 import { Pagination } from './Pagination';
+import { Badge, StatusDot, FilterInput, EmptyState, StatusBanner } from './ui';
 
 const PAGE_SIZE = 5;
 
@@ -11,20 +12,15 @@ interface Props {
   onVerify: () => Promise<{ valid: boolean; message: string }>;
 }
 
-function DecisionDot({ decision }: { decision: string }) {
-  const c: Record<string, string> = {
-    ALLOWED: 'var(--color-success)', DENIED: 'var(--color-danger)',
-    ESCALATED: 'var(--color-warning)', REVOKED: 'var(--color-danger)',
-    EXPIRED: 'var(--color-text-subtle)', REGISTERED: 'var(--color-brand)', PENDING: 'var(--color-warning)',
-  };
-  return <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: c[decision] ?? 'var(--color-text-subtle)' }} />;
-}
-
-function decisionColor(d: string) {
-  if (d === 'ALLOWED' || d === 'REGISTERED') return 'var(--color-success-text)';
-  if (d === 'DENIED' || d === 'REVOKED') return 'var(--color-danger-text)';
-  return 'var(--color-warning-text)';
-}
+const DECISION_STYLES: Record<string, { bg: string; color: string; border: string; dot: string }> = {
+  ALLOWED:    { bg: '#e7faf0', color: '#12b76a', border: '#12b76a33', dot: '#12b76a' },
+  REGISTERED: { bg: '#ebf0ff', color: '#3b6cff', border: '#3b6cff33', dot: '#3b6cff' },
+  DENIED:     { bg: '#fef2f2', color: '#ef4444', border: '#ef444433', dot: '#ef4444' },
+  REVOKED:    { bg: '#fef2f2', color: '#ef4444', border: '#ef444433', dot: '#ef4444' },
+  ESCALATED:  { bg: '#fefce8', color: '#f59e0b', border: '#f59e0b33', dot: '#f59e0b' },
+  PENDING:    { bg: '#fefce8', color: '#f59e0b', border: '#f59e0b33', dot: '#f59e0b' },
+  EXPIRED:    { bg: '#f0f1f7', color: '#9498b3', border: '#e2e4ef',   dot: '#9498b3' },
+};
 
 export function AuditTrail({ entries, onExport, onVerify }: Props) {
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -49,109 +45,153 @@ export function AuditTrail({ entries, onExport, onVerify }: Props) {
   };
 
   return (
-    <div className="flex flex-col h-full gap-2">
-      {/* Toolbar */}
-      <div className="flex gap-2 flex-shrink-0">
-        <input type="text" placeholder="Filter entries…" value={filter}
-          onChange={e => { setFilter(e.target.value); setPage(1); }}
-          className="flex-1 rounded px-3 py-1.5 text-xs border focus:outline-none"
-          style={{ background: 'var(--color-bg-page)', borderColor: 'var(--color-border)',
-            color: 'var(--color-text-high)' }} />
-        <button onClick={handleVerify}
-          className="text-xs font-medium px-3 py-1.5 rounded border transition-colors hover:opacity-80"
-          style={{ background: 'var(--color-bg-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-medium)' }}>
+    <div className="flex flex-col h-full">
+      {/* Filter toolbar — inside panel body at top */}
+      <div className="px-4 py-3 border-b border-[#e2e4ef] flex gap-2 shrink-0">
+        <FilterInput
+          value={filter}
+          onChange={v => { setFilter(v); setPage(1); }}
+          placeholder="Filter entries…"
+        />
+        <button
+          onClick={handleVerify}
+          className="px-3 py-[7px] rounded-[10px] border border-[#e2e4ef] bg-[#f0f1f7] text-[#5c6078] text-[11px] font-medium cursor-pointer whitespace-nowrap hover:bg-[#eceef5] transition-colors"
+        >
           Verify
         </button>
-        <button onClick={onExport}
-          className="text-xs font-medium px-3 py-1.5 rounded border transition-colors hover:opacity-80"
-          style={{ background: 'var(--color-bg-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-medium)' }}>
+        <button
+          onClick={onExport}
+          className="px-3 py-[7px] rounded-[10px] border border-[#e2e4ef] bg-[#f0f1f7] text-[#5c6078] text-[11px] font-medium cursor-pointer whitespace-nowrap hover:bg-[#eceef5] transition-colors"
+        >
           Export
         </button>
       </div>
 
-      {/* Verify banner */}
       {verifyResult && (
-        <div className="rounded px-3 py-2 text-xs font-medium border"
-          style={{
-            background: verifyResult.valid ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
-            color: verifyResult.valid ? 'var(--color-success-text)' : 'var(--color-danger-text)',
-            borderColor: verifyResult.valid ? '#ABF5D1' : '#FFBDAD',
-          }}>
-          {verifyResult.valid ? '✓' : '✗'} {verifyResult.message}
+        <div className="px-4 pt-2 shrink-0">
+          <StatusBanner type={verifyResult.valid ? 'success' : 'error'} text={verifyResult.message} />
         </div>
       )}
 
       {/* Entries */}
-      <div className="flex-1 overflow-y-auto space-y-1.5 min-h-0">
+      <div className="flex-1 overflow-y-auto min-h-0">
         {filtered.length === 0 ? (
-          <div className="text-xs text-center py-8" style={{ color: 'var(--color-text-subtle)' }}>
-            {filter ? 'No matching entries' : 'No audit entries yet'}
-          </div>
-        ) : pagedEntries.map(entry => (
-          <div key={entry.id} className="rounded border overflow-hidden"
-            style={{ background: 'var(--color-bg-surface)', borderColor: 'var(--color-border)' }}>
-            <button className="w-full text-left p-2.5 transition-colors hover:opacity-80"
-              style={{ background: 'inherit' }}
-              onClick={() => setExpanded(expanded === entry.id ? null : entry.id)}>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-mono w-6 flex-shrink-0" style={{ color: 'var(--color-text-subtle)' }}>
-                  #{entry.sequenceNumber}
-                </span>
-                <DecisionDot decision={entry.decision} />
-                <span className="text-xs font-mono flex-shrink-0" style={{ color: 'var(--color-text-subtle)' }}>
-                  {new Date(entry.timestamp).toLocaleTimeString()}
-                </span>
-                <span className="text-xs font-medium truncate flex-1" style={{ color: 'var(--color-text-medium)' }}>
-                  {entry.type}
-                </span>
-                <span className="text-xs font-semibold flex-shrink-0" style={{ color: decisionColor(entry.decision) }}>
-                  {entry.decision}
-                </span>
-              </div>
-              <div className="flex items-center gap-1 mt-0.5 ml-8">
-                <span className="text-xs font-mono truncate" style={{ color: 'var(--color-text-low)' }}>{entry.action}</span>
-                {entry.resource && <span className="text-xs" style={{ color: 'var(--color-border-bold)' }}>→</span>}
-                <span className="text-xs truncate" style={{ color: 'var(--color-text-low)' }}>{entry.resource}</span>
-              </div>
-            </button>
-
-            {expanded === entry.id && (
-              <div className="px-3 pb-3 pt-2 space-y-2"
-                style={{ borderTop: '1px solid var(--color-border)', background: 'var(--color-bg-sunken)' }}>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                  <div><span style={{ color: 'var(--color-text-low)' }}>Agent:</span>{' '}
-                    <span className="font-mono" style={{ color: 'var(--color-text-high)' }}>{entry.agentId}</span></div>
-                  <div><span style={{ color: 'var(--color-text-low)' }}>Policy:</span>{' '}
-                    <span style={{ color: 'var(--color-text-high)' }}>{entry.policyId ?? '—'}</span></div>
-                  <div><span style={{ color: 'var(--color-text-low)' }}>User:</span>{' '}
-                    <span className="font-mono" style={{ color: 'var(--color-text-high)' }}>{entry.userId}</span></div>
-                  {entry.tokenTTL && (
-                    <div><span style={{ color: 'var(--color-text-low)' }}>TTL:</span>{' '}
-                      <span className="font-semibold" style={{ color: 'var(--color-success-text)' }}>{entry.tokenTTL}s</span></div>
+          <EmptyState
+            message={filter ? 'No matching entries' : 'No audit entries yet'}
+          />
+        ) : pagedEntries.map((entry, idx) => {
+          const ds = DECISION_STYLES[entry.decision] ?? { bg: '#f0f1f7', color: '#9498b3', border: '#e2e4ef', dot: '#9498b3' };
+          const isOpen = expanded === entry.id;
+          const isLast = idx === pagedEntries.length - 1;
+          return (
+            <div
+              key={entry.id}
+              style={{ borderBottom: isLast ? 'none' : '1px solid #e2e4ef' }}
+            >
+              <button
+                className="w-full text-left px-5 py-3.5 bg-transparent border-none cursor-pointer hover:bg-[#eceef5] transition-colors"
+                onClick={() => setExpanded(isOpen ? null : entry.id)}
+              >
+                {/* Main row */}
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className="text-[10px] text-[#9498b3] shrink-0 min-w-[28px]"
+                    style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+                  >
+                    #{entry.sequenceNumber}
+                  </span>
+                  <StatusDot color={ds.dot} />
+                  <span
+                    className="text-[11px] font-medium text-[#5c6078] flex-1 truncate"
+                    style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+                  >
+                    {entry.type}
+                  </span>
+                  <span
+                    className="text-[10px] text-[#9498b3] shrink-0"
+                    style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+                  >
+                    {new Date(entry.timestamp).toLocaleTimeString()}
+                  </span>
+                  <Badge style={{ background: ds.bg, color: ds.color, border: `1px solid ${ds.border}` }}>
+                    {entry.decision}
+                  </Badge>
+                  <span className="text-[10px] text-[#9498b3] shrink-0">{isOpen ? '▲' : '▼'}</span>
+                </div>
+                {/* Detail sub-row */}
+                <div className="flex gap-1.5 mt-1 ml-[52px]">
+                  <span
+                    className="text-[10px] text-[#9498b3] truncate"
+                    style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+                  >
+                    {entry.action}
+                  </span>
+                  {entry.resource && (
+                    <span
+                      className="text-[10px] text-[#d0d3e2]"
+                      style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+                    >
+                      → {entry.resource}
+                    </span>
                   )}
                 </div>
-                <div className="text-xs italic" style={{ color: 'var(--color-text-medium)' }}>{entry.reason}</div>
-                {entry.tokenScopes && (
-                  <div className="flex gap-1 flex-wrap">
-                    {entry.tokenScopes.map(s => (
-                      <span key={s} className="text-xs px-1.5 py-0.5 rounded font-mono"
-                        style={{ background: 'var(--color-brand-light)', color: 'var(--color-info-text)' }}>{s}</span>
+              </button>
+
+              {isOpen && (
+                <div className="px-5 py-3.5 border-t border-[#e2e4ef] bg-[#f6f7fb]">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mb-2.5">
+                    {[
+                      ['Agent', entry.agentId],
+                      ['Policy', entry.policyId ?? '—'],
+                      ['User', entry.userId],
+                      ...(entry.tokenTTL ? [['TTL', `${entry.tokenTTL}s`]] : []),
+                    ].map(([label, val]) => (
+                      <div key={label} className="text-[11px]">
+                        <span className="text-[#9498b3]">{label}: </span>
+                        <span
+                          className="text-[#1a1d2e]"
+                          style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+                        >
+                          {val}
+                        </span>
+                      </div>
                     ))}
                   </div>
-                )}
-                <div className="pt-1 space-y-0.5" style={{ borderTop: '1px solid var(--color-border)' }}>
-                  <div className="text-xs font-mono break-all" style={{ color: 'var(--color-text-subtle)' }}>
-                    hash: {entry.hash.substring(0, 20)}…
-                  </div>
-                  <div className="text-xs font-mono break-all" style={{ color: 'var(--color-border-bold)' }}>
-                    prev: {entry.previousHash.substring(0, 20)}…
+                  <div className="text-[11px] text-[#5c6078] italic mb-2.5">{entry.reason}</div>
+                  {entry.tokenScopes && (
+                    <div className="flex flex-wrap gap-1 mb-2.5">
+                      {entry.tokenScopes.map(s => (
+                        <span
+                          key={s}
+                          className="text-[10px] px-[6px] py-[2px] rounded-[6px] bg-[#f0f1f7] text-[#5c6078] border border-[#e2e4ef]"
+                          style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+                        >
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="border-t border-[#e2e4ef] pt-2">
+                    <div
+                      className="text-[10px] text-[#9498b3] break-all"
+                      style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+                    >
+                      hash: {entry.hash.substring(0, 20)}…
+                    </div>
+                    <div
+                      className="text-[10px] text-[#d0d3e2] break-all"
+                      style={{ fontFamily: 'var(--font-ibm-plex-mono), IBM Plex Mono, monospace' }}
+                    >
+                      prev: {entry.previousHash.substring(0, 20)}…
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
       </div>
+
       <Pagination page={page} totalPages={totalPages} onPage={setPage} />
     </div>
   );
