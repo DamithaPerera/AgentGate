@@ -1,8 +1,13 @@
 import AgentGate from '@damitha-perera/agentgate';
 
-const gate = new AgentGate({
-  apiKey: 'AGENTGATE_API_KEY_PLACEHOLDER',
-});
+const apiKey = process.env.AGENTGATE_API_KEY;
+if (!apiKey) {
+  console.error('❌  Set AGENTGATE_API_KEY before running this script.');
+  console.error('    AGENTGATE_API_KEY=ag_live_... node scripts/demo.mjs');
+  process.exit(1);
+}
+
+const gate = new AgentGate({ apiKey });
 
 // ── STEP 1: Register the agent ────────────────────────────────
 console.log('\n📋 Registering agent...\n');
