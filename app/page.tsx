@@ -93,7 +93,7 @@ export default function LandingPage() {
               <Link href="/dashboard" className="hover:scale-105" style={{ padding: '14px 32px', borderRadius: 10, background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)', color: '#fff', fontWeight: 700, fontSize: 15, textDecoration: 'none', boxShadow: '0 4px 24px rgba(59,108,255,0.5)', display: 'inline-block' }}>
                 Open Dashboard →
               </Link>
-              <Link href="/auth/login?returnTo=/dashboard" style={{ padding: '14px 28px', borderRadius: 10, background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600, fontSize: 15, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.15)', display: 'inline-block' }}>
+              <Link href="/auth/login?returnTo=/dashboard" prefetch={false} style={{ padding: '14px 28px', borderRadius: 10, background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600, fontSize: 15, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.15)', display: 'inline-block' }}>
                 Sign in free
               </Link>
             </div>
@@ -227,7 +227,7 @@ export default function LandingPage() {
             <Link href="/dashboard" style={{ padding: '14px 36px', borderRadius: 10, background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)', color: '#fff', fontWeight: 700, fontSize: 16, textDecoration: 'none', boxShadow: '0 4px 24px rgba(59,108,255,0.5)', display: 'inline-block' }}>
               Open Dashboard →
             </Link>
-            <Link href="/auth/login?returnTo=/dashboard" style={{ padding: '14px 28px', borderRadius: 10, background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600, fontSize: 15, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.15)', display: 'inline-block' }}>
+            <Link href="/auth/login?returnTo=/dashboard" prefetch={false} style={{ padding: '14px 28px', borderRadius: 10, background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600, fontSize: 15, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.15)', display: 'inline-block' }}>
               Sign in free
             </Link>
           </div>

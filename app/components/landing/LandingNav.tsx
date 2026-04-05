@@ -49,7 +49,7 @@ export function LandingNav() {
                 ? <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer" style={{ padding: '8px 16px', borderRadius: 8, color: '#2D3748', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>{l.label}</a>
                 : <Link key={l.label} href={l.href} style={{ padding: '8px 16px', borderRadius: 8, color: '#2D3748', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>{l.label}</Link>
             )}
-            <Link href="/auth/login?returnTo=/dashboard" style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #E2E8F0', color: '#2D3748', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
+            <Link href="/auth/login?returnTo=/dashboard" prefetch={false} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #E2E8F0', color: '#2D3748', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
               Log in
             </Link>
             <Link href="/dashboard" style={{ padding: '8px 20px', borderRadius: 8, background: 'linear-gradient(135deg, #3b6cff, #8b5cf6)', color: '#fff', fontWeight: 600, fontSize: 14, textDecoration: 'none', boxShadow: '0 2px 12px rgba(59,108,255,0.35)' }}>
