@@ -50,11 +50,30 @@ function rowToEntry(row: typeof auditEntries.$inferSelect): AuditEntry {
   };
 }
 
+async function getLastHash(): Promise<string> {
+  // Try Redis first (fast path)
+  const cached = await storage.get(AUDIT_LAST_HASH_KEY);
+  if (cached) return cached;
+
+  // Redis lost the key — bootstrap from DB
+  const rows = await db()
+    .select({ hash: auditEntries.hash })
+    .from(auditEntries)
+    .orderBy(desc(auditEntries.sequenceNumber))
+    .limit(1);
+
+  const lastHash = rows.length ? rows[0].hash : GENESIS_HASH;
+
+  // Restore into Redis so next entry is correct
+  await storage.set(AUDIT_LAST_HASH_KEY, lastHash);
+  return lastHash;
+}
+
 export async function logEntry(params: LogParams): Promise<AuditEntry> {
   const id              = nanoid(16);
   const timestamp       = new Date().toISOString();
   const sequenceNumber  = await storage.incr(AUDIT_SEQ_KEY);
-  const previousHash    = (await storage.get(AUDIT_LAST_HASH_KEY)) ?? GENESIS_HASH;
+  const previousHash    = await getLastHash();
 
   const entryWithoutHash: Omit<AuditEntry, 'hash'> = {
     id,
